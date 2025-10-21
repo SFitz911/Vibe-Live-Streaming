@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Navigation from '@/components/Navigation'
 import VideoPlayer from '@/components/VideoPlayer'
 import ChatBox from '@/components/ChatBox'
+import StreamManager from '@/components/StreamManager'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User, ChevronDown, Mail } from 'lucide-react'
 import { notFound } from 'next/navigation'
@@ -128,6 +129,15 @@ export default function StreamPage({
       <Navigation />
       
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Stream Manager - Only show for stream owners */}
+        <div className="mb-6">
+          <StreamManager 
+            streamId={params.id}
+            streamKey="demo-stream-key"
+            rtmpUrl="rtmp://demo-server.com/live"
+          />
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Video Player Section */}
           <div className="lg:col-span-2 space-y-4">

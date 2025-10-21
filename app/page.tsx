@@ -80,7 +80,7 @@ export default async function HomePage() {
               Live screen sharing for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard/stream/new" className="btn-primary text-lg px-8 py-4">
+              <Link href="/dashboard/stream/setup" className="btn-primary text-lg px-8 py-4">
                 <Play className="mr-2" size={20} />
                 Start Streaming
               </Link>
@@ -124,7 +124,7 @@ export default async function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No Live Streams</h3>
               <p className="text-muted-foreground mb-6">Be the first to go live and start streaming!</p>
-              <Link href="/dashboard/stream/new" className="btn-primary">
+              <Link href="/dashboard/stream/setup" className="btn-primary">
                 <Zap className="mr-2" size={18} />
                 Start Your Stream
               </Link>

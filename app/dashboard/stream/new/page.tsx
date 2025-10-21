@@ -106,6 +106,14 @@ export default function NewStreamPage() {
           <p className="text-gray-400">
             Set up your stream details before going live
           </p>
+          <div className="mt-4">
+            <a
+              href="/dashboard/stream/setup"
+              className="text-primary-400 hover:text-primary-300 underline text-sm"
+            >
+              Need help setting up OBS? View streaming setup guide →
+            </a>
+          </div>
         </div>
 
         {error && (
