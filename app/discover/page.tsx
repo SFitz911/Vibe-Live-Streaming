@@ -4,15 +4,15 @@ import { Search } from 'lucide-react'
 
 const CATEGORIES = [
   'All',
-  'Gaming',
-  'Music',
-  'Sports',
-  'Technology',
-  'Education',
-  'Entertainment',
-  'Art',
-  'Talk Shows',
-  'IRL',
+  'AWS Cloud',
+  'AI & Machine Learning',
+  'Database',
+  'MCP',
+  'DevOps',
+  'Cybersecurity',
+  'Web Development',
+  'Data Science',
+  'Blockchain',
 ]
 
 // Temporarily disabled for deployment

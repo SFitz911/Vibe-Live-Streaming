@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
+import TestNotificationButton from '@/components/TestNotificationButton'
+import TestExpertNotificationButton from '@/components/TestExpertNotificationButton'
 import { Flame, TrendingUp, Users, Play, Star, Zap } from 'lucide-react'
 
 export const revalidate = 0
@@ -59,17 +61,22 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <Navigation />
+      <TestNotificationButton />
+      <TestExpertNotificationButton />
       
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-white" style={{ textShadow: '0 0 2px #000, 0 0 2px #000, 0 0 2px #000, 0 0 2px #000' }}>
+              Nextwork.org
+            </h2>
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               <span className="gradient-text">Vibe Live</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              The ultimate platform for live streaming, connecting creators with their audience in real-time.
+              Live screen sharing for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="btn-primary text-lg px-8 py-4">
@@ -164,7 +171,7 @@ export default async function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">Why Choose Vibe Live?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Professional streaming tools and features designed for creators of all levels.
+              Where IT enthusiasts share their screens, learn to harness advanced AI to create amazing things, and explore cutting-edge technology together. Hangout, experiment, and build your own projects in a collaborative learning environment.
             </p>
           </div>
           
@@ -182,15 +189,15 @@ export default async function HomePage() {
                 <Users className="w-8 h-8 text-blue-500" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-4">Real-time Chat</h3>
-              <p className="text-muted-foreground">Engage with your audience through live chat and interactions.</p>
+              <p className="text-muted-foreground">Connect with fellow students and learners through live chat - ask questions, share insights, and collaborate in real-time.</p>
             </div>
             
             <div className="card p-8 text-center">
               <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Star className="w-8 h-8 text-purple-500" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">Professional Quality</h3>
-              <p className="text-muted-foreground">High-quality streaming with advanced features and analytics.</p>
+              <h3 className="text-xl font-semibold text-foreground mb-4">Expert Support</h3>
+              <p className="text-muted-foreground">Professional help is just one click away - the Nextwork staff is always here to guide and support you.</p>
             </div>
           </div>
         </div>

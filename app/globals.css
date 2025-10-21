@@ -109,3 +109,35 @@ body {
 .stream-card:hover {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
+
+/* Notification slide-in animation */
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.4s ease-out;
+}
+
+/* Expert notification slide-in from top */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInDown {
+  animation: slideInDown 0.4s ease-out;
+}
