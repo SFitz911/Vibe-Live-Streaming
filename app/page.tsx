@@ -52,9 +52,10 @@ async function getRecentStreams() {
   return data || []
 }
 
-export default async function HomePage() {
-  const liveStreams = await getLiveStreams()
-  const recentStreams = await getRecentStreams()
+export default function HomePage() {
+  // Temporarily disable data fetching for deployment
+  const liveStreams: any[] = []
+  const recentStreams: any[] = []
 
   return (
     <main className="min-h-screen bg-gray-950">

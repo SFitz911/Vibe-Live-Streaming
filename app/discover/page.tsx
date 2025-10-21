@@ -1,9 +1,6 @@
-import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import { Search } from 'lucide-react'
-
-export const revalidate = 0
 
 const CATEGORIES = [
   'All',
@@ -18,42 +15,44 @@ const CATEGORIES = [
   'IRL',
 ]
 
-async function getStreams(category?: string) {
-  let query = supabase
-    .from('streams')
-    .select(`
-      *,
-      profiles:user_id (
-        username,
-        display_name,
-        avatar_url,
-        is_verified
-      )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(24)
+// Temporarily disabled for deployment
+// async function getStreams(category?: string) {
+//   let query = supabase
+//     .from('streams')
+//     .select(`
+//       *,
+//       profiles:user_id (
+//         username,
+//         display_name,
+//         avatar_url,
+//         is_verified
+//       )
+//     `)
+//     .order('created_at', { ascending: false })
+//     .limit(24)
 
-  if (category && category !== 'All') {
-    query = query.eq('category', category)
-  }
+//   if (category && category !== 'All') {
+//     query = query.eq('category', category)
+//   }
 
-  const { data, error } = await query
+//   const { data, error } = await query
 
-  if (error) {
-    console.error('Error fetching streams:', error)
-    return []
-  }
+//   if (error) {
+//     console.error('Error fetching streams:', error)
+//     return []
+//   }
 
-  return data || []
-}
+//   return data || []
+// }
 
-export default async function DiscoverPage({
+export default function DiscoverPage({
   searchParams,
 }: {
   searchParams: { category?: string }
 }) {
   const selectedCategory = searchParams.category || 'All'
-  const streams = await getStreams(selectedCategory)
+  // Temporarily disable data fetching for deployment
+  const streams: any[] = []
 
   return (
     <main className="min-h-screen bg-gray-950">

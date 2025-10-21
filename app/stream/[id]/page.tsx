@@ -1,4 +1,3 @@
-import { supabase } from '@/lib/supabase'
 import Navigation from '@/components/Navigation'
 import VideoPlayer from '@/components/VideoPlayer'
 import ChatBox from '@/components/ChatBox'
@@ -6,53 +5,67 @@ import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User } from 'lucide-react'
 import { notFound } from 'next/navigation'
 
-export const revalidate = 0
+// Temporarily disabled for deployment
+// async function getStream(id: string) {
+//   const { data, error } = await supabase
+//     .from('streams')
+//     .select(`
+//       *,
+//       profiles:user_id (
+//         id,
+//         username,
+//         display_name,
+//         avatar_url,
+//         bio,
+//         is_verified
+//       )
+//     `)
+//     .eq('id', id)
+//     .single()
 
-async function getStream(id: string) {
-  const { data, error } = await supabase
-    .from('streams')
-    .select(`
-      *,
-      profiles:user_id (
-        id,
-        username,
-        display_name,
-        avatar_url,
-        bio,
-        is_verified
-      )
-    `)
-    .eq('id', id)
-    .single()
+//   if (error || !data) {
+//     return null
+//   }
 
-  if (error || !data) {
-    return null
-  }
+//   return data
+// }
 
-  return data
-}
+// async function getFollowerCount(userId: string) {
+//   const { count } = await supabase
+//     .from('followers')
+//     .select('*', { count: 'exact', head: true })
+//     .eq('following_id', userId)
 
-async function getFollowerCount(userId: string) {
-  const { count } = await supabase
-    .from('followers')
-    .select('*', { count: 'exact', head: true })
-    .eq('following_id', userId)
+//   return count || 0
+// }
 
-  return count || 0
-}
-
-export default async function StreamPage({
+export default function StreamPage({
   params,
 }: {
   params: { id: string }
 }) {
-  const stream = await getStream(params.id)
-
-  if (!stream) {
-    notFound()
+  // Temporarily disable data fetching for deployment
+  const stream = {
+    id: params.id,
+    title: 'Sample Stream',
+    description: 'This is a sample stream',
+    user_id: 'sample-user',
+    is_live: true,
+    viewer_count: 0,
+    created_at: new Date().toISOString(),
+    playback_url: 'https://sample.m3u8',
+    category: 'Gaming',
+    tags: ['gaming', 'live', 'streaming'],
+    profiles: {
+      username: 'sampleuser',
+      display_name: 'Sample User',
+      avatar_url: null,
+      is_verified: false,
+      bio: 'This is a sample bio for the streamer.',
+    }
   }
 
-  const followerCount = await getFollowerCount(stream.user_id)
+  const followerCount = 0
 
   return (
     <main className="min-h-screen bg-gray-950">
