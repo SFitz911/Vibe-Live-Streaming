@@ -86,7 +86,7 @@ export default function NewStreamPage() {
       }
 
       // Redirect to the new stream page
-      router.push(`/dashboard/stream/${data.stream.id}`)
+      router.push(`/stream/${data.stream.id}`)
     } catch (err: any) {
       setError(err.message)
     } finally {
