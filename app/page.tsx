@@ -105,7 +105,7 @@ export default async function HomePage() {
           
           {liveStreams.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {liveStreams.map((stream) => (
+              {liveStreams.map((stream: any) => (
                 <StreamCard key={stream.id} stream={stream} />
               ))}
             </div>
@@ -142,7 +142,7 @@ export default async function HomePage() {
           
           {recentStreams.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recentStreams.map((stream) => (
+              {recentStreams.map((stream: any) => (
                 <StreamCard key={stream.id} stream={stream} />
               ))}
             </div>
