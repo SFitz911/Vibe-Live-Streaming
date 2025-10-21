@@ -4,6 +4,7 @@ import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
 import TestExpertNotificationButton from '@/components/TestExpertNotificationButton'
 import { Flame, TrendingUp, Users, Play, Star, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 export const revalidate = 0
 
@@ -79,14 +80,14 @@ export default async function HomePage() {
               Live screen sharing for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary text-lg px-8 py-4">
+              <Link href="/dashboard/stream/new" className="btn-primary text-lg px-8 py-4">
                 <Play className="mr-2" size={20} />
                 Start Streaming
-              </button>
-              <button className="btn-secondary text-lg px-8 py-4">
+              </Link>
+              <Link href="/discover" className="btn-secondary text-lg px-8 py-4">
                 <Users className="mr-2" size={20} />
                 Discover Streams
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -105,9 +106,9 @@ export default async function HomePage() {
                 {liveStreams.length} streaming
               </div>
             </div>
-            <button className="text-primary hover:text-primary/80 transition-colors font-medium">
+            <Link href="/discover" className="text-primary hover:text-primary/80 transition-colors font-medium">
               View All →
-            </button>
+            </Link>
           </div>
           
           {liveStreams.length > 0 ? (
@@ -123,10 +124,10 @@ export default async function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No Live Streams</h3>
               <p className="text-muted-foreground mb-6">Be the first to go live and start streaming!</p>
-              <button className="btn-primary">
+              <Link href="/dashboard/stream/new" className="btn-primary">
                 <Zap className="mr-2" size={18} />
                 Start Your Stream
-              </button>
+              </Link>
             </div>
           )}
         </div>
@@ -142,9 +143,9 @@ export default async function HomePage() {
               </div>
               <h2 className="text-3xl font-bold text-foreground">Trending</h2>
             </div>
-            <button className="text-primary hover:text-primary/80 transition-colors font-medium">
+            <Link href="/discover" className="text-primary hover:text-primary/80 transition-colors font-medium">
               View All →
-            </button>
+            </Link>
           </div>
           
           {recentStreams.length > 0 ? (

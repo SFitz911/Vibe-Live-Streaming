@@ -278,7 +278,7 @@ export default function StreamPage({
                     )}
                   </div>
                 </div>
-                <ChatBox streamId={params.id} />
+                <ChatBox streamId={params.id} userId="demo-user" />
               </div>
             </div>
           </div>
