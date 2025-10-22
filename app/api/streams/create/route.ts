@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     // Generate unique stream key
     const streamKey = generateStreamKey()
 
-    // In production, you would create an AWS IVS channel here
-    // For now, we'll use a placeholder playback URL
-    const playbackUrl = `${process.env.AWS_IVS_PLAYBACK_URL || 'https://placeholder.m3u8'}`
+    // Use Owncast stream URL
+    const owncastUrl = process.env.OWNCAST_URL || 'http://localhost:8080'
+    const playbackUrl = `${owncastUrl}/hls/stream.m3u8`
 
     // Temporarily disable database operations for deployment
     const stream = {

@@ -21,6 +21,16 @@ export default function StreamSetupPage() {
 
   const streamingOptions = [
     {
+      name: 'Owncast (Recommended)',
+      free: true,
+      description: 'Self-hosted streaming platform with complete control',
+      rtmpUrl: 'rtmp://your-owncast-server.com:1935/live',
+      streamKey: 'YOUR_OWNCAST_STREAM_KEY',
+      setupUrl: 'http://your-owncast-server.com:8080/admin',
+      pros: ['Complete control', 'No platform restrictions', 'Custom branding', 'Built-in chat', 'Free'],
+      cons: ['Requires server setup', 'Need to handle scaling']
+    },
+    {
       name: 'YouTube Live',
       free: true,
       description: 'Free streaming with unlimited viewers',
@@ -39,16 +49,6 @@ export default function StreamSetupPage() {
       setupUrl: 'https://dashboard.twitch.tv/settings/stream',
       pros: ['Large community', 'Free', 'Good discoverability'],
       cons: ['Gaming-focused', 'Requires Twitch account']
-    },
-    {
-      name: 'Free RTMP Server',
-      free: true,
-      description: 'Self-hosted or free RTMP hosting',
-      rtmpUrl: 'rtmp://your-server.com:1935/live',
-      streamKey: 'your-stream-key',
-      setupUrl: '#',
-      pros: ['Full control', 'No platform restrictions'],
-      cons: ['Requires server setup', 'Limited scalability']
     }
   ]
 
@@ -66,11 +66,62 @@ export default function StreamSetupPage() {
           </p>
         </div>
 
+        {/* Owncast Setup Section */}
+        <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <Video className="h-8 w-8 text-green-500" />
+            <h2 className="text-2xl font-bold text-white">Step 1: Deploy Owncast Server</h2>
+          </div>
+          <p className="text-gray-300 mb-6">
+            Owncast is a free, open-source, self-hosted streaming platform. Deploy it to get complete control over your streaming infrastructure.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-white mb-3">Option A: Docker (Recommended)</h3>
+              <div className="bg-black rounded p-3 text-green-400 font-mono text-sm overflow-x-auto">
+                <div># Deploy Owncast with Docker</div>
+                <div>docker run -d \</div>
+                <div>  --name owncast \</div>
+                <div>  -p 8080:8080 \</div>
+                <div>  -p 1935:1935 \</div>
+                <div>  -v owncast-data:/app/data \</div>
+                <div>  gabekangas/owncast:latest</div>
+              </div>
+              <p className="text-gray-400 text-sm mt-2">
+                Access your Owncast admin at: <code className="text-blue-400">http://localhost:8080/admin</code>
+              </p>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-white mb-3">Option B: VPS Deployment</h3>
+              <div className="space-y-2 text-sm text-gray-300">
+                <div>1. Get a VPS (DigitalOcean, Linode, etc.)</div>
+                <div>2. Install Docker on your server</div>
+                <div>3. Run the Docker command above</div>
+                <div>4. Configure domain and SSL</div>
+                <div>5. Set up firewall rules</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+            <h4 className="text-blue-400 font-semibold mb-2">Quick Start Guide:</h4>
+            <ol className="text-sm text-gray-300 space-y-1">
+              <li>1. Deploy Owncast using Docker command above</li>
+              <li>2. Visit <code className="text-blue-400">http://localhost:8080/admin</code></li>
+              <li>3. Set up your stream key and configure settings</li>
+              <li>4. Use the RTMP URL and stream key in OBS</li>
+              <li>5. Start streaming!</li>
+            </ol>
+          </div>
+        </div>
+
         {/* OBS Download Section */}
         <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Download className="h-8 w-8 text-blue-500" />
-            <h2 className="text-2xl font-bold text-white">Step 1: Download OBS Studio</h2>
+            <h2 className="text-2xl font-bold text-white">Step 2: Download OBS Studio</h2>
           </div>
           <p className="text-gray-300 mb-6">
             OBS Studio is free, open-source software for video recording and live streaming.
@@ -197,7 +248,7 @@ export default function StreamSetupPage() {
         <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8">
           <div className="flex items-center space-x-3 mb-6">
             <Settings className="h-8 w-8 text-primary-500" />
-            <h2 className="text-2xl font-bold text-white">Step 2: Configure OBS Studio</h2>
+            <h2 className="text-2xl font-bold text-white">Step 3: Configure OBS Studio</h2>
           </div>
           
           <div className="space-y-6">
@@ -253,7 +304,7 @@ export default function StreamSetupPage() {
         <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-8">
           <div className="flex items-center space-x-3 mb-6">
             <Monitor className="h-8 w-8 text-green-500" />
-            <h2 className="text-2xl font-bold text-white">Step 3: Hardware Setup</h2>
+            <h2 className="text-2xl font-bold text-white">Step 4: Hardware Setup</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

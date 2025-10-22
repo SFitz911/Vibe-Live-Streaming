@@ -110,7 +110,7 @@ export default function StreamPage({
     is_live: true,
     viewer_count: 0,
     created_at: new Date().toISOString(),
-    playback_url: 'https://sample.m3u8',
+    playback_url: 'http://localhost:8080/hls/stream.m3u8',
     category: 'Gaming',
     tags: ['gaming', 'live', 'streaming'],
     profiles: {
@@ -133,8 +133,8 @@ export default function StreamPage({
         <div className="mb-6">
           <StreamManager 
             streamId={params.id}
-            streamKey="demo-stream-key"
-            rtmpUrl="rtmp://demo-server.com/live"
+            streamKey="your-owncast-stream-key"
+            rtmpUrl="rtmp://localhost:1935/live"
           />
         </div>
         

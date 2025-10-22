@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  owncast:
+    image: gabekangas/owncast:latest
+    container_name: vibe-coding-live-owncast
+    ports:
+      - "8080:8080"  # Web interface
+      - "1935:1935"  # RTMP streaming
+    volumes:
+      - owncast-data:/app/data
+    environment:
+      - OWNCAST_STREAM_KEY=your-stream-key-here
+      - OWNCAST_ADMIN_PASSWORD=your-admin-password
+    restart: unless-stopped
+    networks:
+      - owncast-network
+
+  # Optional: Add a reverse proxy for SSL and domain
+  nginx:
+    image: nginx:alpine
+    container_name: vibe-coding-live-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - owncast
+    restart: unless-stopped
+    networks:
+      - owncast-network
+
+volumes:
+  owncast-data:
+
+networks:
+  owncast-network:
+    driver: bridge

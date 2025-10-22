@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       is_live: true,
       viewer_count: 42,
       created_at: new Date().toISOString(),
-      playback_url: 'https://demo.m3u8',
+      playback_url: 'http://localhost:8080/hls/stream.m3u8',
       category: 'AI & Machine Learning',
       tags: ['coding', 'ai', 'live', 'tutorial'],
     }
