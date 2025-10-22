@@ -88,6 +88,10 @@ export default async function HomePage() {
                 <Users className="mr-2" size={20} />
                 Discover Streams
               </Link>
+              <Link href="/stream/demo-live" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
+                <span className="w-3 h-3 bg-white rounded-full animate-pulse mr-2"></span>
+                Go Live Now
+              </Link>
             </div>
           </div>
         </div>
@@ -124,10 +128,16 @@ export default async function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No Live Streams</h3>
               <p className="text-muted-foreground mb-6">Be the first to go live and start streaming!</p>
-              <Link href="/dashboard/stream/setup" className="btn-primary">
-                <Zap className="mr-2" size={18} />
-                Start Your Stream
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/dashboard/stream/setup" className="btn-primary">
+                  <Zap className="mr-2" size={18} />
+                  Start Your Stream
+                </Link>
+                <Link href="/stream/demo-live" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
+                  Go Live Now
+                </Link>
+              </div>
             </div>
           )}
         </div>
