@@ -51,17 +51,18 @@ npm run dev
 Frontend: Next.js 14 + React 18 + TypeScript
 Backend: Next.js API Routes + Supabase
 Database: PostgreSQL (via Supabase)
-Streaming: OBS Studio + RTMP/YouTube Live/Twitch
+Streaming: OBS Studio + Owncast Server (Self-hosted RTMP)
 Storage: AWS S3 + CloudFront CDN
 Authentication: Supabase Auth
 Styling: Tailwind CSS + Lucide Icons
+Containerization: Docker + Docker Compose
 ```
 
 ### System Architecture
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   OBS Studio    │───▶│   RTMP Server   │───▶│   Video Player  │
-│   (Streamer)    │    │  (YouTube/Twitch)│    │   (Viewers)     │
+│   OBS Studio    │───▶│   Owncast Server│───▶│   Video Player  │
+│   (Streamer)    │    │   (RTMP/HLS)    │    │   (Viewers)     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │
                                 ▼
@@ -69,20 +70,73 @@ Styling: Tailwind CSS + Lucide Icons
 │   Next.js App   │◄───│   Supabase DB   │◄───│   AWS S3/CDN    │
 │   (Web Platform)│    │   (User Data)   │    │   (Assets)       │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                ▲
+                                │
+                        ┌─────────────────┐
+                        │   Docker        │
+                        │   (Owncast)     │
+                        └─────────────────┘
 ```
 
-### Logic Flow
+### Complete Logic Flow & Decision Tree
 ```
-User Journey:
-1. Visit Homepage → 2. Setup OBS → 3. Create Stream → 4. Go Live → 5. View Stream
+┌─────────────────────────────────────────────────────────────────┐
+│                    VIBE CODING LIVE LOGIC TREE                 │
+└─────────────────────────────────────────────────────────────────┘
 
-Technical Flow:
-1. User Authentication (Supabase)
-2. Stream Creation (Database)
-3. OBS Configuration (RTMP)
-4. Live Streaming (External Platform)
-5. Stream Viewing (Video Player)
-6. Real-time Chat (WebSocket)
+USER JOURNEY FLOW:
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Homepage      │───▶│   Setup Guide   │───▶│   Create Stream │
+│   (Landing)     │    │   (OBS/Owncast) │    │   (Metadata)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Deploy        │◄───│   Configure     │◄───│   Stream Setup  │
+│   Owncast       │    │   OBS Studio    │    │   (RTMP/HLS)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Start Stream  │───▶│   Go Live       │───▶│   View Stream   │
+│   (OBS)         │    │   (Owncast)     │    │   (Platform)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+
+TECHNICAL IMPLEMENTATION FLOW:
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   1. Auth       │───▶│   2. Deploy     │───▶│   3. Configure  │
+│   (Supabase)    │    │   (Docker)      │    │   (OBS)         │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   4. Stream     │◄───│   5. RTMP       │◄───│   6. HLS        │
+│   Creation      │    │   Ingest        │    │   Playback      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   7. Live       │───▶│   8. Chat       │───▶│   9. Analytics  │
+│   Streaming     │    │   (Real-time)   │    │   (Monitoring)  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+
+DECISION POINTS:
+┌─────────────────────────────────────────────────────────────────┐
+│  STREAMING OPTIONS:                                             │
+│  ├── Option 1: YouTube Live (External)                         │
+│  ├── Option 2: Twitch (External)                               │
+│  └── Option 3: Owncast (Self-hosted) ← RECOMMENDED             │
+│                                                                 │
+│  DEPLOYMENT OPTIONS:                                            │
+│  ├── Local Development (Docker)                                │
+│  ├── Cloud Deployment (Render/Vercel)                          │
+│  └── Self-hosted Server (VPS)                                  │
+│                                                                 │
+│  INTEGRATION POINTS:                                            │
+│  ├── OBS Studio (Streaming Software)                           │
+│  ├── Owncast Server (RTMP/HLS Server)                          │
+│  └── Next.js App (Web Platform)                                │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## ⚙️ Setup & Installation
@@ -291,6 +345,248 @@ pm2 startup
 - **Pros**: Full control, no platform restrictions
 - **Setup**: Use services like [Restream.io](https://restream.io) or self-host
 
+## 🎯 Owncast Server Integration
+
+### What is Owncast?
+
+Owncast is a self-hosted, open-source live streaming server that provides:
+- **Complete Control**: No platform restrictions or content policies
+- **Custom Branding**: Fully customizable interface
+- **Built-in Chat**: Real-time chat system
+- **HLS Streaming**: Modern video delivery protocol
+- **RTMP Ingest**: Compatible with OBS Studio
+- **Free & Open Source**: No licensing costs
+
+### Why Owncast for Vibe Coding Live?
+
+1. **Educational Focus**: No content restrictions on educational material
+2. **Custom Integration**: Seamless integration with our platform
+3. **Cost Effective**: No per-viewer or bandwidth charges
+4. **Privacy**: All data stays on your server
+5. **Scalability**: Can handle multiple concurrent streams
+
+### Step-by-Step Owncast Setup
+
+#### Step 1: Deploy Owncast Server
+
+**Option A: Local Development (Docker)**
+```bash
+# 1. Ensure Docker Desktop is running
+# 2. Navigate to your project directory
+cd vibe-coding-live
+
+# 3. Start Owncast server
+docker-compose up -d owncast
+
+# 4. Verify it's running
+docker ps
+# You should see: vibe-coding-live-owncast container running
+
+# 5. Access Owncast
+# Web Interface: http://localhost:8080
+# Admin Panel: http://localhost:8080/admin
+```
+
+**Option B: Production Server (VPS)**
+```bash
+# 1. Deploy to your VPS
+git clone https://github.com/owncast/owncast.git
+cd owncast
+
+# 2. Configure and start
+./owncast -config config.yaml
+```
+
+#### Step 2: Configure Owncast Admin
+
+1. **Access Admin Panel**
+   ```
+   URL: http://localhost:8080/admin
+   Username: admin
+   Password: abc123 (CHANGE THIS!)
+   ```
+
+2. **Configure Server Settings**
+   - Update server name and description
+   - Set admin password
+   - Configure stream key (or use default)
+   - Set up custom branding
+
+3. **Get Your Stream Key**
+   - Copy the stream key from admin panel
+   - This will be used in OBS Studio configuration
+
+#### Step 3: Configure OBS Studio
+
+1. **Download OBS Studio**
+   ```
+   Visit: https://obsproject.com/download
+   Install for your operating system
+   ```
+
+2. **Configure Stream Settings**
+   ```
+   Settings → Stream:
+   - Service: Custom
+   - Server: rtmp://localhost:1935/live
+   - Stream Key: [Your Owncast Stream Key]
+   ```
+
+3. **Configure Output Settings**
+   ```
+   Settings → Output:
+   - Output Mode: Simple
+   - Video Bitrate: 2500 Kbps
+   - Audio Bitrate: 128 Kbps
+   ```
+
+4. **Configure Video Settings**
+   ```
+   Settings → Video:
+   - Base Resolution: 1920x1080
+   - Output Resolution: 1280x720
+   - FPS: 30
+   ```
+
+#### Step 4: Add Sources to OBS
+
+1. **Display Capture** (Screen Sharing)
+   - Sources → Add → Display Capture
+   - Select your monitor
+   - Perfect for coding tutorials
+
+2. **Video Capture Device** (Webcam)
+   - Sources → Add → Video Capture Device
+   - Select your webcam
+   - Position as picture-in-picture
+
+3. **Audio Input Capture** (Microphone)
+   - Sources → Add → Audio Input Capture
+   - Select your microphone
+   - Adjust levels in Audio Mixer
+
+#### Step 5: Start Streaming
+
+1. **Test Your Setup**
+   - Click "Start Streaming" in OBS
+   - Check http://localhost:8080 for your live stream
+   - Verify video and audio are working
+
+2. **View on Your Platform**
+   - Open http://localhost:3000/stream/demo-live
+   - Your live stream should appear in the video player
+
+### Owncast Integration Points
+
+#### API Endpoints
+```typescript
+// Stream creation with Owncast URL
+POST /api/streams/create
+{
+  "playback_url": "http://localhost:8080/hls/stream.m3u8",
+  "rtmp_url": "rtmp://localhost:1935/live"
+}
+
+// Latest stream endpoint
+GET /api/streams/latest
+// Returns demo stream with Owncast playback URL
+```
+
+#### Frontend Integration
+```typescript
+// Video player component uses Owncast HLS URL
+<VideoPlayer 
+  src="http://localhost:8080/hls/stream.m3u8"
+  controls={true}
+/>
+
+// Stream manager handles Owncast configuration
+<StreamManager
+  streamKey="your-owncast-stream-key"
+  rtmpUrl="rtmp://localhost:1935/live"
+/>
+```
+
+#### Docker Configuration
+```yaml
+# docker-compose.yml
+services:
+  owncast:
+    image: gabekangas/owncast:latest
+    container_name: vibe-coding-live-owncast
+    ports:
+      - "8080:8080"  # Web interface
+      - "1935:1935"  # RTMP ingest
+    volumes:
+      - owncast-data:/app/data
+```
+
+### Troubleshooting Owncast
+
+#### Common Issues
+
+**1. Owncast Not Starting**
+```bash
+# Check Docker status
+docker ps
+docker logs vibe-coding-live-owncast
+
+# Restart if needed
+docker-compose restart owncast
+```
+
+**2. Stream Not Appearing**
+```bash
+# Check OBS settings
+# Verify RTMP URL: rtmp://localhost:1935/live
+# Verify stream key matches Owncast admin
+
+# Check Owncast logs
+docker logs vibe-coding-live-owncast
+```
+
+**3. Video Not Playing**
+```bash
+# Check HLS URL
+# Verify: http://localhost:8080/hls/stream.m3u8
+
+# Test in browser
+curl http://localhost:8080/hls/stream.m3u8
+```
+
+**4. Chat Not Working**
+```bash
+# Check Owncast admin panel
+# Verify chat is enabled
+# Check WebSocket connections
+```
+
+### Production Deployment
+
+#### Environment Variables
+```env
+# Add to .env.local
+OWNCAST_URL=http://localhost:8080
+OWNCAST_RTMP_URL=rtmp://localhost:1935/live
+OWNCAST_HLS_URL=http://localhost:8080/hls/stream.m3u8
+```
+
+#### Nginx Configuration
+```nginx
+# nginx.conf for production
+server {
+    listen 80;
+    server_name yourdomain.com;
+    
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
 ## 🎯 Streaming Setup
 
 ### For Streamers
@@ -301,11 +597,11 @@ pm2 startup
    # Follow installation instructions for your OS
    ```
 
-2. **Configure OBS**
+2. **Configure OBS for Owncast**
    - Open OBS Studio
    - Go to Settings → Stream
    - Select "Custom" service
-   - Enter your RTMP server and stream key
+   - Enter Owncast RTMP URL and stream key
    - Configure video/audio settings
 
 3. **Add Sources**
@@ -315,8 +611,8 @@ pm2 startup
 
 4. **Start Streaming**
    - Click "Start Streaming" in OBS
-   - Your stream will appear on your chosen platform
-   - Share the stream URL with viewers
+   - Your stream will appear on Owncast server
+   - View on your platform at http://localhost:3000/stream/demo-live
 
 ### For Viewers
 
