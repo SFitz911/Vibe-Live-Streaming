@@ -41,14 +41,16 @@ export default function ExpertHelpNotification({
   useEffect(() => {
     if (!isEnabled) return
 
-    // Check for help requests every 15 seconds (more frequent for experts)
+    // Check for help requests every 1 minute (reduced frequency)
     const checkForHelpRequests = async () => {
       try {
         const url = expertEmail 
           ? `/api/expert/help-requests?expert=${encodeURIComponent(expertEmail)}`
           : '/api/expert/help-requests'
         
-        const response = await fetch(url)
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        })
         if (response.ok) {
           const data = await response.json()
           if (data.newRequest) {
@@ -70,9 +72,9 @@ export default function ExpertHelpNotification({
 
     window.addEventListener('expertHelpRequest', handleTestNotification)
 
-    // Check immediately and then every 15 seconds
+    // Check immediately and then every 1 minute (reduced frequency)
     checkForHelpRequests()
-    const interval = setInterval(checkForHelpRequests, 15000)
+    const interval = setInterval(checkForHelpRequests, 60000)
 
     return () => {
       clearInterval(interval)

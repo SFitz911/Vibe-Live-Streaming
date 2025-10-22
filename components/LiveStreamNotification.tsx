@@ -29,12 +29,14 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
   useEffect(() => {
     if (!isEnabled) return
 
-    // Check for new live streams every 30 seconds
+    // Check for new live streams every 2 minutes (reduced frequency)
     const checkForLiveStreams = async () => {
       try {
         // In a real app, this would be an API call
         // For now, we'll simulate checking for live streams
-        const response = await fetch('/api/streams/check-live')
+        const response = await fetch('/api/streams/check-live', {
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        })
         if (response.ok) {
           const data = await response.json()
           if (data.newLiveStream) {
@@ -56,9 +58,9 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
 
     window.addEventListener('newLiveStream', handleTestNotification)
 
-    // Check immediately and then every 30 seconds
+    // Check immediately and then every 2 minutes (reduced frequency)
     checkForLiveStreams()
-    const interval = setInterval(checkForLiveStreams, 30000)
+    const interval = setInterval(checkForLiveStreams, 120000)
 
     return () => {
       clearInterval(interval)
@@ -94,31 +96,35 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
   }
 
   const playNotificationSound = () => {
-    // Create a pleasant bell sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    
-    // Create oscillators for a pleasant bell sound (E5 chord)
-    const frequencies = [659.25, 783.99, 987.77] // E5, G5, B5
-    const now = audioContext.currentTime
+    try {
+      // Create a pleasant bell sound using Web Audio API
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      
+      // Create oscillators for a pleasant bell sound (E5 chord)
+      const frequencies = [659.25, 783.99, 987.77] // E5, G5, B5
+      const now = audioContext.currentTime
 
-    frequencies.forEach((freq, index) => {
-      const oscillator = audioContext.createOscillator()
-      const gainNode = audioContext.createGain()
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
 
-      oscillator.connect(gainNode)
-      gainNode.connect(audioContext.destination)
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
 
-      oscillator.frequency.value = freq
-      oscillator.type = 'sine'
+        oscillator.frequency.value = freq
+        oscillator.type = 'sine'
 
-      // Envelope for bell-like sound
-      gainNode.gain.setValueAtTime(0, now)
-      gainNode.gain.linearRampToValueAtTime(0.1 - (index * 0.02), now + 0.01)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5)
+        // Envelope for bell-like sound
+        gainNode.gain.setValueAtTime(0, now)
+        gainNode.gain.linearRampToValueAtTime(0.1 - (index * 0.02), now + 0.01)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5)
 
-      oscillator.start(now + (index * 0.05))
-      oscillator.stop(now + 1.5)
-    })
+        oscillator.start(now + (index * 0.05))
+        oscillator.stop(now + 1.5)
+      })
+    } catch (error) {
+      console.log('Audio playback failed:', error)
+    }
   }
 
   const handleViewStream = () => {
