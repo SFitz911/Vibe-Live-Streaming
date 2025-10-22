@@ -110,7 +110,9 @@ export default function StreamPage({
     is_live: true,
     viewer_count: 0,
     created_at: new Date().toISOString(),
-    playback_url: 'http://localhost:8080/hls/stream.m3u8',
+    playback_url: process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:8080/hls/stream.m3u8'
+      : 'https://your-owncast-domain.com/hls/stream.m3u8', // Update this with your deployed Owncast URL
     category: 'Gaming',
     tags: ['gaming', 'live', 'streaming'],
     profiles: {

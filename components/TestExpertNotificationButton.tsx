@@ -32,7 +32,7 @@ export default function TestExpertNotificationButton() {
 
   return (
     <div className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700">
-      <p className="text-white text-sm font-bold mb-2">Expert Mode Test</p>
+      <p className="text-white text-sm font-bold mb-2">I have a Question</p>
       <div className="flex space-x-1 mb-2">
         <button
           onClick={() => setUrgency('low')}
@@ -71,7 +71,7 @@ export default function TestExpertNotificationButton() {
         className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-bold transition-all flex items-center justify-center space-x-2 disabled:opacity-50 text-sm"
       >
         <AlertCircle className="h-4 w-4" />
-        <span>Test Expert Alert</span>
+        <span>Alert Staff of Question</span>
       </button>
     </div>
   )

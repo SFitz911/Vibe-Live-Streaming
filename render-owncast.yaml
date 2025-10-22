@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: owncast-server
+    env: docker
+    dockerfilePath: ./Dockerfile.owncast
+    plan: starter
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: OWNCAST_HOSTNAME
+        value: owncast-server.onrender.com
+    healthCheckPath: /api/status
+    domains:
+      - owncast-server.onrender.com
+    buildCommand: docker pull owncast/owncast:latest
+    startCommand: docker run -p 8080:8080 -p 1935:1935 owncast/owncast:latest

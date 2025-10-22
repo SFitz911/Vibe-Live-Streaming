@@ -28,7 +28,52 @@ interface ChatMessageWithProfile {
 }
 
 export default function ChatBox({ streamId, userId }: ChatBoxProps) {
-  const [messages, setMessages] = useState<ChatMessageWithProfile[]>([])
+  const [messages, setMessages] = useState<ChatMessageWithProfile[]>([
+    // Demo messages to show chat is working
+    {
+      id: '1',
+      stream_id: streamId,
+      user_id: 'demo-user-1',
+      message: 'Welcome to the live stream! 🎉',
+      created_at: new Date(Date.now() - 300000).toISOString(),
+      is_moderator: true,
+      profiles: {
+        id: 'demo-user-1',
+        username: 'instructor',
+        display_name: 'Nextwork Staff',
+        avatar_url: null,
+        is_verified: true,
+      }
+    },
+    {
+      id: '2',
+      stream_id: streamId,
+      user_id: 'demo-user-2',
+      message: 'Excited to learn about AI and cloud tech!',
+      created_at: new Date(Date.now() - 240000).toISOString(),
+      profiles: {
+        id: 'demo-user-2',
+        username: 'learner1',
+        display_name: 'Alex Student',
+        avatar_url: null,
+        is_verified: false,
+      }
+    },
+    {
+      id: '3',
+      stream_id: streamId,
+      user_id: 'demo-user-3',
+      message: 'This is amazing! Thanks for streaming this content.',
+      created_at: new Date(Date.now() - 180000).toISOString(),
+      profiles: {
+        id: 'demo-user-3',
+        username: 'coder99',
+        display_name: 'Jamie Dev',
+        avatar_url: null,
+        is_verified: false,
+      }
+    }
+  ])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -109,7 +154,27 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
     setIsLoading(true)
 
     try {
-      // Temporarily disabled for deployment
+      // Demo mode: Add message directly to local state
+      const newChatMessage: ChatMessageWithProfile = {
+        id: `msg-${Date.now()}`,
+        stream_id: streamId,
+        user_id: userId,
+        message: newMessage.trim(),
+        created_at: new Date().toISOString(),
+        is_moderator: false,
+        profiles: {
+          id: userId,
+          username: 'viewer',
+          display_name: 'You',
+          avatar_url: null,
+          is_verified: false,
+        }
+      }
+
+      setMessages((prev) => [...prev, newChatMessage])
+      setNewMessage('')
+
+      // In production, this would send to the API
       // const response = await fetch('/api/chat', {
       //   method: 'POST',
       //   headers: {
@@ -122,12 +187,6 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
       //   }),
       // })
 
-      // if (response.ok) {
-      //   setNewMessage('')
-      // }
-      
-      // For now, just clear the message
-      setNewMessage('')
     } catch (error) {
       console.error('Error sending message:', error)
     } finally {

@@ -1,0 +1,11 @@
+FROM owncast/owncast:latest
+
+# Expose ports
+EXPOSE 8080 1935
+
+# Set environment variables
+ENV OWNCAST_HOSTNAME=owncast-server.onrender.com
+ENV OWNCAST_PORT=8080
+
+# Start Owncast
+CMD ["/app/owncast"]
