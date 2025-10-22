@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
-import { Flame, TrendingUp, Users, Play, Star, Zap } from 'lucide-react'
+import { Flame, TrendingUp, Users, Play, Star, Zap, Eye } from 'lucide-react'
 import Link from 'next/link'
 
 export const revalidate = 0
