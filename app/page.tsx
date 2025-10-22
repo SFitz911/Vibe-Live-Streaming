@@ -74,10 +74,10 @@ export default async function HomePage() {
               Nextwork.org
             </h2>
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="gradient-text">Vibe Live</span>
+              <span className="gradient-text">Vibe Coding Live</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Live screen sharing for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
+              Live coding sessions for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/dashboard/stream/setup" className="btn-primary text-lg px-8 py-4">

@@ -1,6 +1,6 @@
-# 🎥 Vibe Live - Educational Live Streaming Platform
+# 🎥 Vibe Coding Live - Educational Live Coding Platform
 
-A modern, full-stack live streaming platform built for IT learners and professionals. Share your screen, teach coding, and collaborate in real-time with advanced AI tools and cloud technologies.
+A modern, full-stack live coding platform built for IT learners and professionals. Share your screen, teach coding, and collaborate in real-time with advanced AI tools and cloud technologies.
 
 ## 📋 Table of Contents
 
@@ -28,8 +28,8 @@ A modern, full-stack live streaming platform built for IT learners and professio
 ### 1-Minute Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/vibe-live-streaming.git
-cd vibe-live-streaming
+git clone https://github.com/yourusername/vibe-coding-live.git
+cd vibe-coding-live
 
 # Install dependencies
 npm install
@@ -525,7 +525,7 @@ git push origin feature/your-feature-name
 
 ## 🎉 Success!
 
-Your Vibe Live streaming platform is now ready! 
+Your Vibe Coding Live platform is now ready! 
 
 **Next Steps:**
 1. Deploy to your chosen platform
@@ -533,7 +533,7 @@ Your Vibe Live streaming platform is now ready!
 3. Start creating amazing educational content
 4. Build your community of learners
 
-**Happy Streaming! 🎥✨**
+**Happy Coding! 🎥✨**
 
 ---
 

@@ -7,8 +7,8 @@ import ExpertHelpNotification from '@/components/ExpertHelpNotification'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Vibe Live - Modern Livestreaming Platform',
-  description: 'Self-hosted livestreaming platform powered by Supabase and AWS',
+  title: 'Vibe Coding Live - Educational Live Coding Platform',
+  description: 'Live coding sessions for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.',
 }
 
 export default function RootLayout({

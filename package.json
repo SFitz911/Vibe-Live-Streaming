@@ -1,7 +1,7 @@
 {
-  "name": "vibe-live-streaming",
+  "name": "vibe-coding-live",
   "version": "1.0.0",
-  "description": "Modern livestreaming platform with Supabase and AWS",
+  "description": "Educational live coding platform with Supabase and AWS",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

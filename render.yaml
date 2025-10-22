@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: vibe-live-streaming
+    name: vibe-coding-live
     env: node
     plan: starter  # Paid plan - faster and doesn't sleep
     buildCommand: npm install && npm run build

@@ -5,7 +5,7 @@
 ### Step 1: Create GitHub Repository
 1. Go to [GitHub.com](https://github.com)
 2. Click "New repository"
-3. Name it: `vibe-live-streaming`
+3. Name it: `vibe-coding-live`
 4. Make it **Public** (required for free Render)
 5. Click "Create repository"
 
@@ -18,10 +18,10 @@ git init
 git add .
 
 # Commit
-git commit -m "Initial commit - Vibe Live Streaming"
+git commit -m "Initial commit - Vibe Coding Live"
 
 # Add GitHub remote (replace YOUR_USERNAME)
-git remote add origin https://github.com/YOUR_USERNAME/vibe-live-streaming.git
+git remote add origin https://github.com/YOUR_USERNAME/vibe-coding-live.git
 
 # Push to GitHub
 git push -u origin main
@@ -32,9 +32,9 @@ git push -u origin main
 2. Sign up with GitHub
 3. Click "New +" → "Web Service"
 4. Connect your GitHub repository
-5. Select `vibe-live-streaming`
+5. Select `vibe-coding-live`
 6. Configure:
-   - **Name**: `vibe-live-streaming`
+   - **Name**: `vibe-coding-live`
    - **Environment**: `Node`
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
@@ -50,7 +50,7 @@ Add these in Render dashboard:
 ### Step 5: Deploy!
 1. Click "Create Web Service"
 2. Wait 5-10 minutes for deployment
-3. Your app will be live at: `https://vibe-live-streaming.onrender.com`
+3. Your app will be live at: `https://vibe-coding-live.onrender.com`
 
 ## 🎉 Success!
 Your streaming platform is now live and free!

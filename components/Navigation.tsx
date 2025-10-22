@@ -45,7 +45,7 @@ export default function Navigation() {
               <Radio className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold gradient-text">
-              Vibe Live
+              Vibe Coding Live
             </span>
           </Link>
 
