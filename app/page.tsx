@@ -92,6 +92,10 @@ export default async function HomePage() {
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse mr-2"></span>
                 Go Live Now
               </Link>
+              <Link href="/stream/latest" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
+                <Eye className="mr-2" size={20} />
+                View Live Event
+              </Link>
             </div>
           </div>
         </div>
@@ -136,6 +140,10 @@ export default async function HomePage() {
                 <Link href="/stream/demo-live" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
                   <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
                   Go Live Now
+                </Link>
+                <Link href="/stream/latest" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
+                  <Eye className="mr-2" size={18} />
+                  View Live Event
                 </Link>
               </div>
             </div>
