@@ -31,46 +31,46 @@ export default function TestExpertNotificationButton() {
   }
 
   return (
-    <div className="fixed top-20 left-6 z-50 bg-gray-900 rounded-lg p-4 shadow-2xl border border-gray-700">
+    <div className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700">
       <p className="text-white text-sm font-bold mb-2">Expert Mode Test</p>
-      <div className="flex space-x-2 mb-3">
+      <div className="flex space-x-1 mb-2">
         <button
           onClick={() => setUrgency('low')}
-          className={`px-3 py-1 rounded text-xs font-semibold ${
+          className={`px-2 py-1 rounded text-xs font-semibold ${
             urgency === 'low' 
               ? 'bg-blue-600 text-white' 
-              : 'bg-gray-800 text-gray-400'
+              : 'bg-gray-700 text-gray-400'
           }`}
         >
-          Low
+          Low (2x)
         </button>
         <button
           onClick={() => setUrgency('medium')}
-          className={`px-3 py-1 rounded text-xs font-semibold ${
+          className={`px-2 py-1 rounded text-xs font-semibold ${
             urgency === 'medium' 
               ? 'bg-yellow-600 text-white' 
-              : 'bg-gray-800 text-gray-400'
+              : 'bg-gray-700 text-gray-400'
           }`}
         >
-          Medium
+          Medium (4x)
         </button>
         <button
           onClick={() => setUrgency('high')}
-          className={`px-3 py-1 rounded text-xs font-semibold ${
+          className={`px-2 py-1 rounded text-xs font-semibold ${
             urgency === 'high' 
               ? 'bg-red-600 text-white' 
-              : 'bg-gray-800 text-gray-400'
+              : 'bg-gray-700 text-gray-400'
           }`}
         >
-          High
+          High (6x)
         </button>
       </div>
       <button
         onClick={triggerTestExpertNotification}
         disabled={loading}
-        className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+        className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-bold transition-all flex items-center justify-center space-x-2 disabled:opacity-50 text-sm"
       >
-        <AlertCircle className="h-5 w-5" />
+        <AlertCircle className="h-4 w-4" />
         <span>Test Expert Alert</span>
       </button>
     </div>

@@ -2,7 +2,6 @@ import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
-import TestExpertNotificationButton from '@/components/TestExpertNotificationButton'
 import { Flame, TrendingUp, Users, Play, Star, Zap } from 'lucide-react'
 import Link from 'next/link'
 
@@ -63,7 +62,6 @@ export default async function HomePage() {
     <main className="min-h-screen">
       <Navigation />
       <TestNotificationButton />
-      <TestExpertNotificationButton />
       
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">

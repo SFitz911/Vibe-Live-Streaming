@@ -112,8 +112,8 @@ export default function ExpertHelpNotification({
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     const now = audioContext.currentTime
 
-    // Different urgency levels have different dive speeds
-    const repeatCount = urgency === 'high' ? 3 : urgency === 'medium' ? 2 : 1
+    // Different urgency levels have different sound repetitions
+    const repeatCount = urgency === 'high' ? 6 : urgency === 'medium' ? 4 : 2
 
     for (let i = 0; i < repeatCount; i++) {
       const oscillator = audioContext.createOscillator()
@@ -124,8 +124,8 @@ export default function ExpertHelpNotification({
 
       oscillator.type = 'sawtooth' // Classic submarine alarm sound
       
-      const startTime = now + (i * 0.6)
-      const duration = 0.5
+      const startTime = now + (i * 0.4)
+      const duration = 0.3
 
       // Submarine dive: sweep from high to low frequency
       oscillator.frequency.setValueAtTime(800, startTime)
@@ -152,7 +152,7 @@ export default function ExpertHelpNotification({
       pingOscillator.type = 'sine'
       pingOscillator.frequency.value = 200
       
-      const pingStart = now + (repeatCount * 0.6)
+      const pingStart = now + (repeatCount * 0.4)
       pingGain.gain.setValueAtTime(0.15, pingStart)
       pingGain.gain.exponentialRampToValueAtTime(0.01, pingStart + 0.3)
       

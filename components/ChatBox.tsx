@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 // import { supabase, ChatMessage, Profile } from '@/lib/supabase'
 import { Send } from 'lucide-react'
 import { timeAgo } from '@/lib/utils'
+import TestExpertNotificationButton from './TestExpertNotificationButton'
 
 interface ChatBoxProps {
   streamId: string
@@ -136,6 +137,9 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
 
   return (
     <div className="flex flex-col h-full bg-gray-900 rounded-lg">
+      <div className="p-4 border-b border-gray-800">
+        <TestExpertNotificationButton />
+      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((message) => (
           <div key={message.id} className="flex items-start space-x-2">
