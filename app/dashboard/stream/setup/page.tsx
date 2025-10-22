@@ -24,8 +24,8 @@ export default function StreamSetupPage() {
       name: 'Owncast (Recommended)',
       free: true,
       description: 'Self-hosted streaming platform with complete control',
-      rtmpUrl: 'rtmp://your-owncast-server.com:1935/live',
-      streamKey: 'YOUR_OWNCAST_STREAM_KEY',
+      rtmpUrl: 'rtmp://localhost:1935/live',
+      streamKey: 'jG4zyBNOuBd*KRqN*tzVIgtT32o4HM',
       setupUrl: 'http://your-owncast-server.com:8080/admin',
       pros: ['Complete control', 'No platform restrictions', 'Custom branding', 'Built-in chat', 'Free'],
       cons: ['Requires server setup', 'Need to handle scaling']

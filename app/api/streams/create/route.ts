@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique stream key
-    const streamKey = generateStreamKey()
+    // Use default stream key for Owncast
+    const streamKey = 'jG4zyBNOuBd*KRqN*tzVIgtT32o4HM'
 
     // Use Owncast stream URL
     const owncastUrl = process.env.OWNCAST_URL || 'http://localhost:8080'

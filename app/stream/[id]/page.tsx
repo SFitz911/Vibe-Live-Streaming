@@ -133,7 +133,7 @@ export default function StreamPage({
         <div className="mb-6">
           <StreamManager 
             streamId={params.id}
-            streamKey="your-owncast-stream-key"
+            streamKey="jG4zyBNOuBd*KRqN*tzVIgtT32o4HM"
             rtmpUrl="rtmp://localhost:1935/live"
           />
         </div>
