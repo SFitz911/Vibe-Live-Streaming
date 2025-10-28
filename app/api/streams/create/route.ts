@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
     const streamKey = 'jG4zyBNOuBd*KRqN*tzVIgtT32o4HM'
 
     // Use Owncast stream URL
-    const owncastUrl = process.env.OWNCAST_URL || 'http://localhost:8080'
+    const owncastUrl = process.env.NODE_ENV === 'development' 
+      ? (process.env.OWNCAST_URL || 'http://localhost:8080')
+      : 'https://demo.owncast.online'
     const playbackUrl = `${owncastUrl}/hls/stream.m3u8`
 
     // Temporarily disable database operations for deployment

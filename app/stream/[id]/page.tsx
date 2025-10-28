@@ -112,7 +112,7 @@ export default function StreamPage({
     created_at: new Date().toISOString(),
     playback_url: process.env.NODE_ENV === 'development' 
       ? 'http://localhost:8080/hls/stream.m3u8'
-      : 'https://your-owncast-domain.com/hls/stream.m3u8', // Update this with your deployed Owncast URL
+      : 'https://demo.owncast.online/hls/stream.m3u8', // Using demo Owncast server for production
     category: 'Gaming',
     tags: ['gaming', 'live', 'streaming'],
     profiles: {
@@ -136,7 +136,9 @@ export default function StreamPage({
           <StreamManager 
             streamId={params.id}
             streamKey="jG4zyBNOuBd*KRqN*tzVIgtT32o4HM"
-            rtmpUrl="rtmp://localhost:1935/live"
+            rtmpUrl={process.env.NODE_ENV === 'development' 
+              ? "rtmp://localhost:1935/live"
+              : "rtmp://demo.owncast.online:1935/live"}
           />
         </div>
         
