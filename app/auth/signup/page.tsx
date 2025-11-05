@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
-  const { signIn } = useAuth()
+  const { signUp } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -18,10 +20,17 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const { error: signInError } = await signIn(email, password)
+    // Validate username (alphanumeric and underscores only)
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError('Username can only contain letters, numbers, and underscores')
+      setLoading(false)
+      return
+    }
 
-    if (signInError) {
-      setError(signInError.message)
+    const { error: signUpError } = await signUp(email, password, username, displayName)
+
+    if (signUpError) {
+      setError(signUpError.message)
       setLoading(false)
     } else {
       router.push('/dashboard')
@@ -32,8 +41,8 @@ export default function LoginPage() {
     <main className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your Vibe Coding Live account</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-gray-400">Join Vibe Coding Live and start streaming</p>
         </div>
 
         <div className="bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-800">
@@ -43,6 +52,37 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <div>
+              <label htmlFor="displayName" className="block text-sm font-medium text-gray-300 mb-2">
+                Display Name
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="John Doe"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                required
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="johndoe"
+              />
+              <p className="text-xs text-gray-500 mt-1">Letters, numbers, and underscores only</p>
+            </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
@@ -69,9 +109,11 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="••••••••"
               />
+              <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
             </div>
 
             <button
@@ -79,15 +121,15 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="text-blue-400 hover:text-blue-300 font-semibold">
-                Sign up
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+                Sign in
               </Link>
             </p>
           </div>
@@ -102,3 +144,4 @@ export default function LoginPage() {
     </main>
   )
 }
+

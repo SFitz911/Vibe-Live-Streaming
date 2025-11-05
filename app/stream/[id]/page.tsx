@@ -9,6 +9,7 @@ import LiveKitGoLive from '@/components/LiveKitGoLive'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User, ChevronDown, Mail } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { useAuth } from '@/lib/auth'
 
 // Temporarily disabled for deployment
 // async function getStream(id: string) {
@@ -56,6 +57,7 @@ export default function StreamPage({
 }: {
   params: { id: string }
 }) {
+  const { user, profile, loading: authLoading } = useAuth()
   const [showExpertDropdown, setShowExpertDropdown] = useState(false)
   const [showStreamForm, setShowStreamForm] = useState(true)
   const [streamDetails, setStreamDetails] = useState({
@@ -64,6 +66,53 @@ export default function StreamPage({
     category: 'Web Development',
     tags: '',
   })
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-gray-950">
+        <Navigation />
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Require authentication to stream
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-gray-950">
+        <Navigation />
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Sign In Required</h2>
+            <p className="text-gray-400 mb-6">
+              You need to be signed in to start streaming.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <a
+                href="/auth/login"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Sign In
+              </a>
+              <a
+                href="/auth/signup"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Create Account
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   const handleContactExpert = async (expert: typeof EXPERTS[0]) => {
     // Trigger expert notification
@@ -156,7 +205,7 @@ export default function StreamPage({
                       </label>
                       <input
                         type="text"
-                        value="Natasha (Nextwork.org Instructor)"
+                        value={profile ? `${profile.display_name || profile.username} (@${profile.username})` : 'Loading...'}
                         readOnly
                         disabled
                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-300 cursor-not-allowed"
@@ -257,7 +306,8 @@ export default function StreamPage({
                   <div className="w-full">
                     <LiveKitGoLive 
                       roomName={params.id} 
-                      userName={`User_${Date.now()}`}
+                      userName={profile?.username || `User_${Date.now()}`}
+                      userId={user?.id}
                       streamTitle={streamDetails.title}
                       streamDescription={streamDetails.description}
                       streamCategory={streamDetails.category}

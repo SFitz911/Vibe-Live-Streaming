@@ -15,7 +15,8 @@ async function fetchLiveKitToken(room: string, name: string): Promise<string> {
 // Create a stream in the database
 async function createLiveStream(
     roomName: string, 
-    userName: string, 
+    userName: string,
+    userId?: string,
     title?: string, 
     description?: string, 
     category?: string,
@@ -27,6 +28,7 @@ async function createLiveStream(
         body: JSON.stringify({
             roomName,
             userName,
+            userId, // Pass the authenticated user ID
             title: title || `${userName}'s Live Stream`,
             description: description || 'Live coding session',
             category: category || 'Web Development',
@@ -51,6 +53,7 @@ async function endLiveStream(streamId: string): Promise<void> {
 interface LiveKitGoLiveProps {
     roomName: string;
     userName: string;
+    userId?: string;
     streamTitle?: string;
     streamDescription?: string;
     streamCategory?: string;
@@ -59,7 +62,8 @@ interface LiveKitGoLiveProps {
 
 export default function LiveKitGoLive({ 
     roomName, 
-    userName, 
+    userName,
+    userId,
     streamTitle, 
     streamDescription, 
     streamCategory, 
@@ -76,7 +80,8 @@ export default function LiveKitGoLive({
             // Step 1: Create stream in database
             const newStreamId = await createLiveStream(
                 roomName, 
-                userName, 
+                userName,
+                userId, // Pass authenticated user ID
                 streamTitle, 
                 streamDescription, 
                 streamCategory,

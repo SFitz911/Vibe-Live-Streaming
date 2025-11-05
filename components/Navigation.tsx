@@ -120,7 +120,7 @@ export default function Navigation() {
                   Sign In
                 </Link>
                 <Link
-                  href="/auth/register"
+                  href="/auth/signup"
                   className="btn-primary text-sm"
                 >
                   Get Started

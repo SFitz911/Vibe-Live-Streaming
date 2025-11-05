@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { roomName, userName, title, description, category, tags } = await request.json()
+    const { roomName, userName, userId, title, description, category, tags } = await request.json()
 
     if (!roomName || !userName) {
       return NextResponse.json(
@@ -18,15 +18,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For development: Use Natasha from Nextwork instructors
-    // In production, this would come from the authenticated user
-    const testUserId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' // Natasha from setup-all-data.sql
+    // Use authenticated user ID, fallback to Natasha for testing/development
+    const streamUserId = userId || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 
     // Create the stream record
     const { data: stream, error } = await supabase
       .from('streams')
       .insert({
-        user_id: testUserId,
+        user_id: streamUserId,
         title: title || `${userName}'s Live Stream`,
         description: description || 'Live streaming now!',
         category: category || 'Web Development',
