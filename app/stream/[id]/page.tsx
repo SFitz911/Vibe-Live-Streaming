@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navigation from '@/components/Navigation'
 import VideoPlayer from '@/components/VideoPlayer'
 import ChatBox from '@/components/ChatBox'
@@ -10,6 +10,7 @@ import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User, ChevronDown, Mail } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 // Temporarily disabled for deployment
 // async function getStream(id: string) {
@@ -66,6 +67,47 @@ export default function StreamPage({
     category: 'Web Development',
     tags: '',
   })
+  const [stream, setStream] = useState<any>(null)
+  const [streamLoading, setStreamLoading] = useState(true)
+
+  // Fetch stream data
+  useEffect(() => {
+    const fetchStream = async () => {
+      // Special case: demo-live is always for creating new streams
+      if (params.id === 'demo-live') {
+        setStream({ id: 'demo-live', is_live: false, isGoLivePage: true })
+        setStreamLoading(false)
+        return
+      }
+
+      // Fetch actual stream from database
+      const { data, error } = await supabase
+        .from('streams')
+        .select(`
+          *,
+          profiles (
+            username,
+            display_name,
+            avatar_url,
+            is_verified,
+            bio
+          )
+        `)
+        .eq('id', params.id)
+        .single()
+
+      if (error || !data) {
+        console.error('Error fetching stream:', error)
+        setStream(null)
+      } else {
+        setStream(data)
+      }
+      
+      setStreamLoading(false)
+    }
+
+    fetchStream()
+  }, [params.id])
 
   // Show loading state while checking auth
   if (authLoading) {
@@ -158,30 +200,43 @@ export default function StreamPage({
     setShowExpertDropdown(false)
   }
 
-  // Temporarily disable data fetching for deployment
-  const stream = {
-    id: params.id,
-    title: 'Sample Stream',
-    description: 'This is a sample stream',
-    user_id: 'sample-user',
-    is_live: true,
-    viewer_count: 0,
-    created_at: new Date().toISOString(),
-    playback_url: process.env.NODE_ENV === 'development'
-      ? 'http://localhost:8080/hls/stream.m3u8'
-      : 'https://demo.owncast.online/hls/stream.m3u8', // Using demo Owncast server for production
-    category: 'Gaming',
-    tags: ['gaming', 'live', 'streaming'],
-    profiles: {
-      username: 'sampleuser',
-      display_name: 'Sample User',
-      avatar_url: null,
-      is_verified: false,
-      bio: 'This is a sample bio for the streamer.',
-    }
+  // Show loading while fetching stream
+  if (streamLoading) {
+    return (
+      <main className="min-h-screen bg-gray-950">
+        <Navigation />
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading stream...</p>
+          </div>
+        </div>
+      </main>
+    )
   }
 
-  const followerCount = 0
+  // Stream not found
+  if (!stream) {
+    return (
+      <main className="min-h-screen bg-gray-950">
+        <Navigation />
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📹</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Stream Not Found</h2>
+            <p className="text-gray-400 mb-6">This stream doesn't exist or has been deleted.</p>
+            <a href="/discover" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+              Browse Live Streams
+            </a>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  // Determine if this is a "Go Live" page or a "Watch Recording" page
+  const isGoLivePage = stream.isGoLivePage || (stream.is_live && stream.user_id === user?.id)
+  const isRecordedStream = !stream.is_live && stream.playback_url
 
   return (
     <main className="min-h-screen bg-gray-950">
@@ -189,10 +244,29 @@ export default function StreamPage({
 
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Go Live Section (left) */}
-          <div className="lg:col-span-2 flex flex-col items-center justify-center">
-            <div className="w-full bg-gradient-to-br from-blue-900/80 to-gray-900/80 rounded-2xl shadow-xl p-8 flex flex-col items-center border border-blue-800">
-              {showStreamForm ? (
+          {/* Main Content (left) - Video Player OR Go Live Interface */}
+          <div className="lg:col-span-2">
+            {isRecordedStream ? (
+              /* Show Video Player for Recorded Streams */
+              <div className="w-full">
+                <VideoPlayer playbackUrl={stream.playback_url} isLive={false} />
+                
+                {/* Stream Info Below Video */}
+                <div className="mt-6 bg-gray-900 rounded-xl p-6 border border-gray-800">
+                  <h1 className="text-2xl font-bold text-white mb-2">{stream.title}</h1>
+                  <p className="text-gray-400 mb-4">{stream.description}</p>
+                  
+                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                    <span>{formatViewerCount(stream.viewer_count)} views</span>
+                    {stream.category && <span>{stream.category}</span>}
+                    <span>{timeAgo(stream.created_at)} ago</span>
+                  </div>
+                </div>
+              </div>
+            ) : isGoLivePage ? (
+              /* Show Go Live Interface for demo-live or streamer's own streams */
+              <div className="w-full bg-gradient-to-br from-blue-900/80 to-gray-900/80 rounded-2xl shadow-xl p-8 flex flex-col items-center border border-blue-800">
+                {showStreamForm ? (
                 <>
                   <h2 className="text-2xl font-bold text-white mb-4 text-center">Set Up Your Live Stream</h2>
                   <p className="text-gray-300 mb-6 text-center max-w-lg">Fill in the details below before going live</p>
@@ -322,7 +396,23 @@ export default function StreamPage({
                   </button>
                 </>
               )}
-            </div>
+              </div>
+            ) : (
+              /* Stream has ended without a recording */
+              <div className="w-full bg-gray-900 rounded-2xl shadow-xl p-12 flex flex-col items-center border border-gray-800">
+                <div className="text-6xl mb-6">📹</div>
+                <h2 className="text-2xl font-bold text-white mb-4 text-center">Stream Has Ended</h2>
+                <p className="text-gray-400 text-center max-w-lg mb-6">
+                  This stream has ended and no recording is available.
+                </p>
+                <a
+                  href="/discover"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Browse Live Streams
+                </a>
+              </div>
+            )}
           </div>
           {/* Chat Section (right) */}
           <div className="lg:col-span-1">
