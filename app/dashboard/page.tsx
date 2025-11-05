@@ -7,6 +7,7 @@ import { supabase, Stream } from '@/lib/supabase'
 import { Video, Plus, Settings, BarChart3, Users, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
+import UserLevelBadge, { calculateUserLevel } from '@/components/UserLevelBadge'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -108,19 +109,23 @@ export default function DashboardPage() {
 
   const liveStream = streams.find(s => s.is_live)
   const totalViews = streams.reduce((acc, s) => acc + s.viewer_count, 0)
+  const { level, totalPoints } = calculateUserLevel(streams)
 
   return (
     <main className="min-h-screen bg-gray-950">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Creator Dashboard
-          </h1>
-          <p className="text-gray-400">
-            Manage your streams and engage with your audience
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Creator Dashboard
+            </h1>
+            <p className="text-gray-400">
+              Manage your streams and engage with your audience
+            </p>
+          </div>
+          <UserLevelBadge totalPoints={totalPoints} size="medium" />
         </div>
 
         {/* Stats Grid */}
@@ -179,10 +184,13 @@ export default function DashboardPage() {
               <span className="font-semibold">Stream Settings</span>
             </button>
 
-            <button className="bg-gray-900 hover:bg-gray-800 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors border border-gray-800">
+            <Link
+              href="/dashboard/analytics"
+              className="bg-gray-900 hover:bg-gray-800 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors border border-gray-800"
+            >
               <BarChart3 className="h-6 w-6" />
               <span className="font-semibold">View Analytics</span>
-            </button>
+            </Link>
           </div>
         </div>
 
