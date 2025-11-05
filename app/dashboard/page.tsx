@@ -43,6 +43,34 @@ export default function DashboardPage() {
     }
   }
 
+  const handleEndStream = async (streamId: string) => {
+    if (!confirm('Are you sure you want to end this stream?')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/streams/livekit-end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ streamId }),
+      })
+
+      if (response.ok) {
+        // Update local state
+        setStreams(streams.map(s => 
+          s.id === streamId ? { ...s, is_live: false, ended_at: new Date().toISOString() } : s
+        ))
+        alert('Stream ended successfully!')
+      } else {
+        const error = await response.json()
+        alert(`Failed to end stream: ${error.message}`)
+      }
+    } catch (error) {
+      console.error('Error ending stream:', error)
+      alert('Failed to end stream')
+    }
+  }
+
   const handleDeleteStream = async (streamId: string) => {
     if (!confirm('Are you sure you want to delete this stream? This action cannot be undone.')) {
       return
@@ -195,7 +223,10 @@ export default function DashboardPage() {
                         View Stream
                       </Link>
                       {stream.is_live && (
-                        <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                        <button
+                          onClick={() => handleEndStream(stream.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                        >
                           End Stream
                         </button>
                       )}
