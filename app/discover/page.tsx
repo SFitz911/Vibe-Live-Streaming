@@ -171,8 +171,8 @@ export default async function DiscoverPage({
             <p className="text-gray-400 mb-4">
               No one is streaming at the moment. Be the first to go live!
             </p>
-            <a 
-              href="/dashboard/stream/setup"
+            <a
+              href="/stream/demo-live"
               className="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Start Streaming
