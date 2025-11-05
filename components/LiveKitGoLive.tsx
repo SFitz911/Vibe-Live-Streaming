@@ -73,6 +73,8 @@ export default function LiveKitGoLive({
     const [error, setError] = useState<string | null>(null);
     const [joined, setJoined] = useState(false);
     const [streamId, setStreamId] = useState<string | null>(null);
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+    const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
 
     const handleJoin = async () => {
         setError(null);
@@ -99,6 +101,36 @@ export default function LiveKitGoLive({
     };
 
     const handleLeave = async () => {
+        // Stop recording if active
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+
+        // Upload recording if we have chunks
+        if (recordedChunks.length > 0 && streamId) {
+            try {
+                console.log('Uploading recording...');
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('streamId', streamId);
+
+                const response = await fetch('/api/streams/upload-recording', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    console.log('Recording uploaded successfully!');
+                } else {
+                    console.error('Failed to upload recording');
+                }
+            } catch (error) {
+                console.error('Error uploading recording:', error);
+            }
+        }
+
         // End stream in database
         if (streamId) {
             try {
@@ -111,6 +143,8 @@ export default function LiveKitGoLive({
         setJoined(false);
         setToken(null);
         setStreamId(null);
+        setMediaRecorder(null);
+        setRecordedChunks([]);
     };
 
     if (!joined) {
@@ -143,7 +177,11 @@ export default function LiveKitGoLive({
                 }}
             >
                 <RoomAudioRenderer />
-                <VideoWithZoom onLeave={handleLeave} />
+                <VideoWithZoom 
+                    onLeave={handleLeave}
+                    setMediaRecorder={setMediaRecorder}
+                    setRecordedChunks={setRecordedChunks}
+                />
             </LiveKitRoom>
         </div>
     );
@@ -164,14 +202,27 @@ const ZoomContext = React.createContext<{
     isScreenShare: false,
 });
 
-// Wrapper component that provides zoom context
-function VideoWithZoom({ onLeave }: { onLeave: () => void }) {
+// Wrapper component that provides zoom context and recording
+function VideoWithZoom({ 
+    onLeave, 
+    setMediaRecorder, 
+    setRecordedChunks 
+}: { 
+    onLeave: () => void;
+    setMediaRecorder: (recorder: MediaRecorder | null) => void;
+    setRecordedChunks: React.Dispatch<React.SetStateAction<Blob[]>>;
+}) {
     const [zoom, setZoom] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isScreenShare, setIsScreenShare] = useState(false);
 
     return (
         <ZoomContext.Provider value={{ zoom, position, setZoom, setPosition, isScreenShare }}>
+            <RecordingManager 
+                setMediaRecorder={setMediaRecorder}
+                setRecordedChunks={setRecordedChunks}
+            />
+            
             {/* Video Area with Zoom Controls */}
             <div className="relative">
                 <div className="w-full h-[600px] bg-gray-950 overflow-hidden">
@@ -188,6 +239,81 @@ function VideoWithZoom({ onLeave }: { onLeave: () => void }) {
             </div>
         </ZoomContext.Provider>
     );
+}
+
+// Component to handle stream recording
+function RecordingManager({
+    setMediaRecorder,
+    setRecordedChunks,
+}: {
+    setMediaRecorder: (recorder: MediaRecorder | null) => void;
+    setRecordedChunks: React.Dispatch<React.SetStateAction<Blob[]>>;
+}) {
+    const { localParticipant } = useLocalParticipant();
+
+    useEffect(() => {
+        if (!localParticipant) return;
+
+        // Get all local tracks (camera and screen share)
+        const startRecording = async () => {
+            try {
+                // Create a canvas to capture the stream
+                const stream = new MediaStream();
+                
+                // Add audio tracks
+                localParticipant.audioTrackPublications.forEach((pub) => {
+                    if (pub.track) {
+                        stream.addTrack(pub.track.mediaStreamTrack);
+                    }
+                });
+
+                // Add video tracks (camera or screen share)
+                localParticipant.videoTrackPublications.forEach((pub) => {
+                    if (pub.track) {
+                        stream.addTrack(pub.track.mediaStreamTrack);
+                    }
+                });
+
+                if (stream.getTracks().length === 0) {
+                    console.log('No tracks available for recording yet');
+                    return;
+                }
+
+                // Create MediaRecorder
+                const recorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9,opus',
+                });
+
+                const chunks: Blob[] = [];
+
+                recorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+
+                recorder.onstop = () => {
+                    console.log('Recording stopped, total chunks:', chunks.length);
+                    setRecordedChunks(chunks);
+                };
+
+                // Start recording (collect data every 1 second)
+                recorder.start(1000);
+                setMediaRecorder(recorder);
+                
+                console.log('Recording started');
+            } catch (error) {
+                console.error('Error starting recording:', error);
+            }
+        };
+
+        // Small delay to ensure tracks are published
+        const timeout = setTimeout(startRecording, 1000);
+
+        return () => clearTimeout(timeout);
+    }, [localParticipant, setMediaRecorder, setRecordedChunks]);
+
+    return null; // This component doesn't render anything
 }
 
 // Custom video display that prioritizes screen share over camera
