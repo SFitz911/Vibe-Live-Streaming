@@ -19,14 +19,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the stream to mark it as ended
-    const updateData: any = {
-      is_live: false,
-      ended_at: new Date().toISOString(),
-    }
-    
+    // @ts-ignore - TypeScript has issues with Supabase update types
     const { error } = await supabase
       .from('streams')
-      .update(updateData)
+      .update({
+        is_live: false,
+        ended_at: new Date().toISOString(),
+      })
       .eq('id', streamId)
 
     if (error) {
