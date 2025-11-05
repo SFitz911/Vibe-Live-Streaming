@@ -149,6 +149,21 @@ export default function StreamPage({
                   <p className="text-gray-300 mb-6 text-center max-w-lg">Fill in the details below before going live</p>
                   
                   <div className="w-full max-w-2xl space-y-4">
+                    {/* Streamer Name (Read-only) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Streamer Name
+                      </label>
+                      <input
+                        type="text"
+                        value="Natasha (Nextwork.org Instructor)"
+                        readOnly
+                        disabled
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-300 cursor-not-allowed"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">This is automatically set based on your account</p>
+                    </div>
+
                     {/* Title */}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
