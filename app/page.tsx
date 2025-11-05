@@ -1,64 +1,96 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
-import { Flame, TrendingUp, Users, Play, Star, Zap, Eye, Settings, Compass, BookOpen, HelpCircle, FileText } from 'lucide-react'
+import { Flame, TrendingUp, Users, Play, Star, Zap, Eye, Settings, Compass, BookOpen, HelpCircle, FileText, Filter } from 'lucide-react'
 import Link from 'next/link'
 
-export const revalidate = 0
+export default function HomePage() {
+  const [liveStreams, setLiveStreams] = useState<any[]>([])
+  const [recentStreams, setRecentStreams] = useState<any[]>([])
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'views'>('newest')
+  const [filterCategory, setFilterCategory] = useState<string>('All')
+  const [categories, setCategories] = useState<string[]>(['All'])
 
-async function getLiveStreams() {
-  const { data, error } = await supabase
-    .from('streams')
-    .select(`
-      *,
-      profiles (
-        username,
-        display_name,
-        avatar_url,
-        is_verified
-      )
-    `)
-    .eq('is_live', true)
-    .order('viewer_count', { ascending: false })
-    .limit(12)
+  useEffect(() => {
+    fetchLiveStreams()
+  }, [])
 
-  if (error) {
-    console.error('Error fetching live streams:', error)
-    return []
+  useEffect(() => {
+    fetchRecentStreams()
+  }, [sortBy, filterCategory])
+
+  const fetchLiveStreams = async () => {
+    const { data, error } = await supabase
+      .from('streams')
+      .select(`
+        *,
+        profiles (
+          username,
+          display_name,
+          avatar_url,
+          is_verified
+        )
+      `)
+      .eq('is_live', true)
+      .order('viewer_count', { ascending: false })
+      .limit(12)
+
+    if (!error && data) {
+      setLiveStreams(data)
+    }
   }
 
-  return data || []
-}
+  const fetchRecentStreams = async () => {
+    let query = supabase
+      .from('streams')
+      .select(`
+        *,
+        profiles (
+          username,
+          display_name,
+          avatar_url,
+          is_verified
+        )
+      `)
+      .eq('is_live', false)
 
-async function getRecentStreams() {
-  const { data, error } = await supabase
-    .from('streams')
-    .select(`
-      *,
-      profiles (
-        username,
-        display_name,
-        avatar_url,
-        is_verified
-      )
-    `)
-    .eq('is_live', false)  // Only show recorded streams (not currently live)
-    .order('viewer_count', { ascending: false })  // Most viewed first
-    .order('created_at', { ascending: false })
-    .limit(12)
+    // Apply category filter
+    if (filterCategory && filterCategory !== 'All') {
+      query = query.eq('category', filterCategory)
+    }
 
-  if (error) {
-    console.error('Error fetching recent streams:', error)
-    return []
+    // Apply sorting
+    if (sortBy === 'newest') {
+      query = query.order('created_at', { ascending: false })
+    } else if (sortBy === 'oldest') {
+      query = query.order('created_at', { ascending: true })
+    } else if (sortBy === 'views') {
+      query = query.order('viewer_count', { ascending: false })
+    }
+
+    query = query.limit(12)
+
+    const { data, error } = await query
+
+    if (!error && data) {
+      setRecentStreams(data)
+      
+      // Extract unique categories from all recorded streams
+      const allRecorded = await supabase
+        .from('streams')
+        .select('category')
+        .eq('is_live', false)
+      
+      if (allRecorded.data) {
+        const uniqueCategories = ['All', ...new Set(allRecorded.data.map(s => s.category).filter(Boolean))]
+        setCategories(uniqueCategories as string[])
+      }
+    }
   }
-
-  return data || []
-}
-
-export default async function HomePage() {
-  const liveStreams = await getLiveStreams()
-  const recentStreams = await getRecentStreams()
 
   return (
     <main className="min-h-screen">
@@ -163,6 +195,64 @@ export default async function HomePage() {
             <Link href="/discover" className="text-primary hover:text-primary/80 transition-colors font-medium">
               View All →
             </Link>
+          </div>
+
+          {/* Sorting and Filtering Controls */}
+          <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            {/* Sort By */}
+            <div className="flex items-center space-x-3">
+              <Filter className="text-gray-400" size={18} />
+              <span className="text-sm text-gray-400 font-medium">Sort by:</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSortBy('newest')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    sortBy === 'newest'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Newest
+                </button>
+                <button
+                  onClick={() => setSortBy('oldest')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    sortBy === 'oldest'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Oldest
+                </button>
+                <button
+                  onClick={() => setSortBy('views')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    sortBy === 'views'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  Most Viewed
+                </button>
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setFilterCategory(category)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filterCategory === category
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
           
           {recentStreams.length > 0 ? (
