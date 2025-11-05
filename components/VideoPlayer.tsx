@@ -7,14 +7,51 @@ interface VideoPlayerProps {
   playbackUrl: string
   autoplay?: boolean
   muted?: boolean
+  isLive?: boolean
+}
+
+// Extract YouTube video ID from URL
+function getYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/,
+    /youtube\.com\/live\/([^&\?\/]+)/,
+  ]
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) return match[1]
+  }
+  
+  return null
 }
 
 export default function VideoPlayer({
   playbackUrl,
   autoplay = true,
   muted = false,
+  isLive = false,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Check if URL is a YouTube video
+  const youtubeVideoId = getYouTubeVideoId(playbackUrl)
+
+  // If it's YouTube, render iframe instead
+  if (youtubeVideoId) {
+    return (
+      <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+        <iframe
+          width="100%"
+          height="100%"
+          src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=${autoplay ? 1 : 0}&mute=${muted ? 1 : 0}`}
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="absolute inset-0 w-full h-full"
+        />
+      </div>
+    )
+  }
 
   useEffect(() => {
     if (!videoRef.current || !playbackUrl) return

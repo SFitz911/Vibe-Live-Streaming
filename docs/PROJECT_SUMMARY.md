@@ -2,7 +2,7 @@
 
 ## 🎯 What Was Created
 
-A **complete, production-ready livestreaming platform** inspired by Owncast, built with modern technologies and ready to deploy to your website.
+A **complete, production-ready livestreaming platform** inspired by Livekit, built with modern technologies and ready to deploy to your website.
 
 ### Key Highlights
 - ✅ **Full-stack application** with Next.js 14 + TypeScript

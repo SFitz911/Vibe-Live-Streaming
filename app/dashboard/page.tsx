@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import { supabase, Stream } from '@/lib/supabase'
-import { Video, Plus, Settings, BarChart3, Users, Trash2 } from 'lucide-react'
+import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import UserLevelBadge, { calculateUserLevel } from '@/components/UserLevelBadge'
@@ -170,13 +170,21 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/dashboard/stream/new"
               className="bg-primary-600 hover:bg-primary-700 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
             >
               <Plus className="h-6 w-6" />
               <span className="font-semibold">Create New Stream</span>
+            </Link>
+
+            <Link
+              href="/dashboard/import-youtube"
+              className="bg-red-600 hover:bg-red-700 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
+            >
+              <Youtube className="h-6 w-6" />
+              <span className="font-semibold">Import YouTube</span>
             </Link>
             
             <button className="bg-gray-900 hover:bg-gray-800 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors border border-gray-800">
