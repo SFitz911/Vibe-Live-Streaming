@@ -1,0 +1,32 @@
+========================================
+COPY & PASTE INTO RENDER.COM
+========================================
+
+Go to: https://dashboard.render.com/web/srv-d3rj6ihr0fns73dmp2v0
+Click: "Environment" (left sidebar)
+Add these 3 variables:
+
+----------------------------------------
+Variable 1:
+Key:   NEXT_PUBLIC_LIVEKIT_URL
+Value: wss://videostreamv5-yz05w4m7.livekit.cloud
+
+----------------------------------------
+Variable 2:
+Key:   LIVEKIT_API_KEY
+Value: APItzRyhtWbXm34
+
+----------------------------------------
+Variable 3:
+Key:   LIVEKIT_API_SECRET
+Value: 7ODDtDWt8RVgdfVTVFl199LSEABNAsN3MI9Q5s7LwtA
+
+----------------------------------------
+
+After adding all 3:
+1. Click "Save Changes"
+2. Click "Manual Deploy" → "Clear build cache & deploy"
+3. Wait 3-5 minutes
+
+========================================
+
