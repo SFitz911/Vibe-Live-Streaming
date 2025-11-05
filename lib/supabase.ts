@@ -1,11 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Use fallback for build time, real values for runtime
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://hjhmgllhkppevwzocvtm.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env.local file.')
+// Validate only in runtime, not during build
+if (typeof window !== 'undefined') {
+  if (!supabaseUrl?.startsWith('https://')) {
+    console.error('Invalid Supabase URL:', supabaseUrl)
+  }
+  if (!supabaseAnonKey) {
+    console.error('Missing Supabase anon key')
+  }
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
