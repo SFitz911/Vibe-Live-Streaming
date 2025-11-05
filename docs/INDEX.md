@@ -26,6 +26,7 @@
 | 🚀 Deploy my own version | `RENDER_DEPLOYMENT.md` |
 | 🎥 Set up video streaming | `LIVEKIT_SETUP.md` |
 | 💾 Configure video storage | `SUPABASE_STORAGE_SETUP.md` |
+| 🎬 Enable animated thumbnails | `AUTO_THUMBNAIL_CAPTURE.md` |
 | 🐛 Fix problems | `TROUBLESHOOTING.md` |
 | 📊 Understand architecture | `PROJECT_SUMMARY.md` |
 | 🔄 Restore working version | `WORKING_LOCAL_BACKUP_2025-11-05.md` |
@@ -141,29 +142,35 @@
 - **Time:** 10 minutes
 - **Prerequisites:** Supabase account
 
+**7. AUTO_THUMBNAIL_CAPTURE.md** 🎬 NEW
+- **Who:** Want animated live stream previews
+- **What:** Auto-capture 3-second clips from live streams
+- **Time:** 5 minutes setup, automatic after that
+- **Prerequisites:** Supabase Storage configured
+
 ---
 
 ### 🔵 Deployment Guides (Going live)
 
-**7. RENDER_DEPLOYMENT.md** ⭐ Recommended
+**8. RENDER_DEPLOYMENT.md** ⭐ Recommended
 - **Who:** Deploying to production (easiest option)
 - **What:** Step-by-step Render.com deployment
 - **Time:** 30 minutes
 - **Prerequisites:** GitHub account, Render account
 
-**8. DEPLOYMENT.md**
+**9. DEPLOYMENT.md**
 - **Who:** Deploying to any hosting provider
 - **What:** General deployment instructions
 - **Time:** 1-2 hours
 - **Prerequisites:** Hosting account, some deployment knowledge
 
-**9. AWS_SETUP.md**
+**10. AWS_SETUP.md**
 - **Who:** Enterprise users or AWS infrastructure
 - **What:** AWS IVS, S3, CloudFront setup
 - **Time:** 2-3 hours
 - **Prerequisites:** AWS account, some AWS knowledge
 
-**10. OWNCAST_SETUP.md**
+**11. OWNCAST_SETUP.md**
 - **Who:** Want self-hosted streaming alternative
 - **What:** Owncast server setup and integration
 - **Time:** 1-2 hours
@@ -173,19 +180,19 @@
 
 ### 📊 Reference Documentation
 
-**11. PROJECT_SUMMARY.md**
+**12. PROJECT_SUMMARY.md**
 - **Who:** Understanding the technical architecture
 - **What:** System design, database schema, API routes
 - **Time:** 30 minutes reading
 - **Prerequisites:** Basic programming knowledge
 
-**12. WORKING_LOCAL_BACKUP_2025-11-05.md**
+**13. WORKING_LOCAL_BACKUP_2025-11-05.md**
 - **Who:** Restoring a known working version
 - **What:** Complete working configuration snapshot
 - **Time:** 30 minutes to restore
 - **Prerequisites:** Basic Git knowledge
 
-**13. DevTeam.md**
+**14. DevTeam.md**
 - **Who:** Contributors and maintainers
 - **What:** Development team info and contribution guidelines
 - **Time:** 10 minutes reading

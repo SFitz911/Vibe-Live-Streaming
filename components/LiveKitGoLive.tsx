@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LiveKitRoom, useTrackToggle, RoomAudioRenderer, useTracks, useLocalParticipant } from "@livekit/components-react";
 import { Track } from "livekit-client";
+import { scheduleAutomaticThumbnailCapture } from "@/lib/thumbnail";
 
 // Utility to fetch a LiveKit token from your backend
 async function fetchLiveKitToken(room: string, name: string): Promise<string> {
@@ -181,6 +182,7 @@ export default function LiveKitGoLive({
                     onLeave={handleLeave}
                     setMediaRecorder={setMediaRecorder}
                     setRecordedChunks={setRecordedChunks}
+                    streamId={streamId}
                 />
             </LiveKitRoom>
         </div>
@@ -206,11 +208,13 @@ const ZoomContext = React.createContext<{
 function VideoWithZoom({ 
     onLeave, 
     setMediaRecorder, 
-    setRecordedChunks 
+    setRecordedChunks,
+    streamId 
 }: { 
     onLeave: () => void;
     setMediaRecorder: (recorder: MediaRecorder | null) => void;
     setRecordedChunks: React.Dispatch<React.SetStateAction<Blob[]>>;
+    streamId?: string | null;
 }) {
     const [zoom, setZoom] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -226,7 +230,7 @@ function VideoWithZoom({
             {/* Video Area with Zoom Controls */}
             <div className="relative">
                 <div className="w-full h-[600px] bg-gray-950 overflow-hidden">
-                    <CustomVideoDisplay />
+                    <CustomVideoDisplay streamId={streamId || undefined} />
                 </div>
                 
                 {/* Zoom Controls - Positioned outside top-right */}
@@ -317,11 +321,13 @@ function RecordingManager({
 }
 
 // Custom video display that prioritizes screen share over camera
-function CustomVideoDisplay() {
+function CustomVideoDisplay({ streamId }: { streamId?: string }) {
     const { localParticipant } = useLocalParticipant();
     const { zoom, position, setPosition } = React.useContext(ZoomContext);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const thumbnailTimerRef = useRef<NodeJS.Timeout | null>(null);
     
     const tracks = useTracks([
         { source: Track.Source.ScreenShare, withPlaceholder: false },
@@ -342,6 +348,32 @@ function CustomVideoDisplay() {
     // Prioritize screen share over camera
     const activeTrack = screenShareTrack || cameraTrack;
     const isScreenShare = !!screenShareTrack;
+
+    // Schedule automatic thumbnail capture after 2 minutes of streaming
+    useEffect(() => {
+        if (videoRef.current && streamId && activeTrack) {
+            // Clear any existing timer
+            if (thumbnailTimerRef.current) {
+                clearTimeout(thumbnailTimerRef.current);
+            }
+
+            // Schedule thumbnail capture (2 minutes after going live)
+            thumbnailTimerRef.current = scheduleAutomaticThumbnailCapture(
+                videoRef.current,
+                streamId,
+                2 // Capture after 2 minutes
+            );
+
+            console.log('🎬 Auto-thumbnail scheduled for 2 minutes from now...');
+        }
+
+        // Cleanup timer on unmount
+        return () => {
+            if (thumbnailTimerRef.current) {
+                clearTimeout(thumbnailTimerRef.current);
+            }
+        };
+    }, [streamId, activeTrack]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (zoom > 1 && isScreenShare) {
@@ -390,6 +422,8 @@ function CustomVideoDisplay() {
                     ref={(videoEl) => {
                         if (videoEl && activeTrack.publication.track) {
                             activeTrack.publication.track.attach(videoEl);
+                            // Also store in videoRef for thumbnail capture
+                            (videoRef as any).current = videoEl;
                         }
                     }}
                     autoPlay
