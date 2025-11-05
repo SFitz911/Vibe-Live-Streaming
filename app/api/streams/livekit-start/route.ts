@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { roomName, userName, title, description, category } = await request.json()
+    const { roomName, userName, title, description, category, tags } = await request.json()
 
     if (!roomName || !userName) {
       return NextResponse.json(
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         title: title || `${userName}'s Live Stream`,
         description: description || 'Live streaming now!',
         category: category || 'Web Development',
+        tags: tags || [],
         stream_key: roomName,
         playback_url: `ws://localhost:7880/${roomName}`,
         is_live: true,

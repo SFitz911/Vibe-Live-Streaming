@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { LiveKitRoom, VideoConference, useTrackToggle, RoomAudioRenderer, useTracks } from "@livekit/components-react";
+import { LiveKitRoom, useTrackToggle, RoomAudioRenderer, useTracks, useLocalParticipant } from "@livekit/components-react";
 import { Track } from "livekit-client";
 
 // Utility to fetch a LiveKit token from your backend
@@ -13,16 +13,24 @@ async function fetchLiveKitToken(room: string, name: string): Promise<string> {
 }
 
 // Create a stream in the database
-async function createLiveStream(roomName: string, userName: string): Promise<string> {
+async function createLiveStream(
+    roomName: string, 
+    userName: string, 
+    title?: string, 
+    description?: string, 
+    category?: string,
+    tags?: string
+): Promise<string> {
     const resp = await fetch('/api/streams/livekit-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             roomName,
             userName,
-            title: `${userName}'s Live Stream`,
-            description: 'Live coding session',
-            category: 'Web Development',
+            title: title || `${userName}'s Live Stream`,
+            description: description || 'Live coding session',
+            category: category || 'Web Development',
+            tags: tags ? tags.split(',').map(t => t.trim()) : [],
         }),
     });
     
@@ -43,9 +51,20 @@ async function endLiveStream(streamId: string): Promise<void> {
 interface LiveKitGoLiveProps {
     roomName: string;
     userName: string;
+    streamTitle?: string;
+    streamDescription?: string;
+    streamCategory?: string;
+    streamTags?: string;
 }
 
-export default function LiveKitGoLive({ roomName, userName }: LiveKitGoLiveProps) {
+export default function LiveKitGoLive({ 
+    roomName, 
+    userName, 
+    streamTitle, 
+    streamDescription, 
+    streamCategory, 
+    streamTags 
+}: LiveKitGoLiveProps) {
     const [token, setToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [joined, setJoined] = useState(false);
@@ -55,7 +74,14 @@ export default function LiveKitGoLive({ roomName, userName }: LiveKitGoLiveProps
         setError(null);
         try {
             // Step 1: Create stream in database
-            const newStreamId = await createLiveStream(roomName, userName);
+            const newStreamId = await createLiveStream(
+                roomName, 
+                userName, 
+                streamTitle, 
+                streamDescription, 
+                streamCategory,
+                streamTags
+            );
             setStreamId(newStreamId);
             
             // Step 2: Get LiveKit token
@@ -112,17 +138,199 @@ export default function LiveKitGoLive({ roomName, userName }: LiveKitGoLiveProps
                 }}
             >
                 <RoomAudioRenderer />
-                
-                {/* Video Area */}
-                <div className="w-full h-[600px] relative bg-gray-950 overflow-hidden">
-                    <VideoConference />
-                </div>
-                
-                {/* Controls Below Video */}
-                <div className="w-full bg-gray-800 p-4">
-                    <LiveKitControls onLeave={handleLeave} />
-                </div>
+                <VideoWithZoom onLeave={handleLeave} />
             </LiveKitRoom>
+        </div>
+    );
+}
+
+// Zoom state context
+const ZoomContext = React.createContext<{
+    zoom: number;
+    position: { x: number; y: number };
+    setZoom: (zoom: number) => void;
+    setPosition: (pos: { x: number; y: number }) => void;
+    isScreenShare: boolean;
+}>({
+    zoom: 1,
+    position: { x: 0, y: 0 },
+    setZoom: () => {},
+    setPosition: () => {},
+    isScreenShare: false,
+});
+
+// Wrapper component that provides zoom context
+function VideoWithZoom({ onLeave }: { onLeave: () => void }) {
+    const [zoom, setZoom] = useState(1);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isScreenShare, setIsScreenShare] = useState(false);
+
+    return (
+        <ZoomContext.Provider value={{ zoom, position, setZoom, setPosition, isScreenShare }}>
+            {/* Video Area with Zoom Controls */}
+            <div className="relative">
+                <div className="w-full h-[600px] bg-gray-950 overflow-hidden">
+                    <CustomVideoDisplay />
+                </div>
+                
+                {/* Zoom Controls - Positioned outside top-right */}
+                <ZoomControls />
+            </div>
+            
+            {/* Controls Below Video */}
+            <div className="w-full bg-gray-800 p-4">
+                <LiveKitControls onLeave={onLeave} />
+            </div>
+        </ZoomContext.Provider>
+    );
+}
+
+// Custom video display that prioritizes screen share over camera
+function CustomVideoDisplay() {
+    const { localParticipant } = useLocalParticipant();
+    const { zoom, position, setPosition } = React.useContext(ZoomContext);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    
+    const tracks = useTracks([
+        { source: Track.Source.ScreenShare, withPlaceholder: false },
+        { source: Track.Source.Camera, withPlaceholder: false },
+    ]);
+
+    // Find screen share or camera from local participant
+    const screenShareTrack = tracks.find(
+        t => t.source === Track.Source.ScreenShare && 
+        t.participant.identity === localParticipant.identity
+    );
+    
+    const cameraTrack = tracks.find(
+        t => t.source === Track.Source.Camera && 
+        t.participant.identity === localParticipant.identity
+    );
+
+    // Prioritize screen share over camera
+    const activeTrack = screenShareTrack || cameraTrack;
+    const isScreenShare = !!screenShareTrack;
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (zoom > 1 && isScreenShare) {
+            setIsDragging(true);
+            setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (isDragging) {
+            setPosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y,
+            });
+        }
+    };
+
+    const handleMouseUp = () => setIsDragging(false);
+
+    if (!activeTrack) {
+        return (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <div className="text-center">
+                    <div className="text-6xl mb-4">📹</div>
+                    <p>Waiting for camera or screen share...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full h-full flex items-center justify-center bg-black">
+            <div
+                className={`w-full h-full ${zoom > 1 && isScreenShare ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{
+                    transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                    transformOrigin: 'center center',
+                    transition: isDragging ? 'none' : 'transform 0.2s ease-out'
+                }}
+            >
+                <video
+                    ref={(videoEl) => {
+                        if (videoEl && activeTrack.publication.track) {
+                            activeTrack.publication.track.attach(videoEl);
+                        }
+                    }}
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-contain"
+                />
+            </div>
+        </div>
+    );
+}
+
+// Zoom controls component - positioned outside the video box
+function ZoomControls() {
+    const { localParticipant } = useLocalParticipant();
+    const { zoom, setZoom, setPosition, isScreenShare: contextScreenShare } = React.useContext(ZoomContext);
+    
+    const tracks = useTracks([
+        { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ]);
+
+    const screenShareTrack = tracks.find(
+        t => t.source === Track.Source.ScreenShare && 
+        t.participant.identity === localParticipant.identity
+    );
+    
+    const isScreenShare = !!screenShareTrack;
+
+    // Reset zoom when screen share stops
+    useEffect(() => {
+        if (!isScreenShare) {
+            setZoom(1);
+            setPosition({ x: 0, y: 0 });
+        }
+    }, [isScreenShare, setZoom, setPosition]);
+
+    if (!isScreenShare) {
+        return null;
+    }
+
+    const handleZoomIn = () => setZoom(Math.min(zoom + 0.25, 3));
+    const handleZoomOut = () => setZoom(Math.max(zoom - 0.25, 1));
+    const handleZoomReset = () => {
+        setZoom(1);
+        setPosition({ x: 0, y: 0 });
+    };
+
+    return (
+        <div className="absolute -top-2 -right-2 z-30 flex flex-col gap-2 bg-gray-800/95 rounded-lg p-2 border-2 border-blue-500 shadow-xl">
+            <button
+                onClick={handleZoomIn}
+                disabled={zoom >= 3}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded text-sm font-semibold transition-colors"
+            >
+                🔍+ Zoom In
+            </button>
+            <button
+                onClick={handleZoomOut}
+                disabled={zoom <= 1}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded text-sm font-semibold transition-colors"
+            >
+                🔍- Zoom Out
+            </button>
+            <button
+                onClick={handleZoomReset}
+                disabled={zoom === 1}
+                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded text-sm font-semibold transition-colors"
+            >
+                ↺ Reset
+            </button>
+            <div className="text-center text-xs text-gray-300 mt-1 font-bold">
+                {Math.round(zoom * 100)}%
+            </div>
         </div>
     );
 }

@@ -57,6 +57,13 @@ export default function StreamPage({
   params: { id: string }
 }) {
   const [showExpertDropdown, setShowExpertDropdown] = useState(false)
+  const [showStreamForm, setShowStreamForm] = useState(true)
+  const [streamDetails, setStreamDetails] = useState({
+    title: '',
+    description: '',
+    category: 'Web Development',
+    tags: '',
+  })
 
   const handleContactExpert = async (expert: typeof EXPERTS[0]) => {
     // Trigger expert notification
@@ -136,11 +143,120 @@ export default function StreamPage({
           {/* Go Live Section (left) */}
           <div className="lg:col-span-2 flex flex-col items-center justify-center">
             <div className="w-full bg-gradient-to-br from-blue-900/80 to-gray-900/80 rounded-2xl shadow-xl p-8 flex flex-col items-center border border-blue-800">
-              <h2 className="text-2xl font-bold text-white mb-4 text-center">Go Live Now</h2>
-              <p className="text-gray-300 mb-6 text-center max-w-lg">Start your live stream instantly from your browser. Allow camera and microphone access, then click below to go live!</p>
-              <div className="w-full">
-                <LiveKitGoLive roomName={params.id} userName={`User_${Date.now()}`} />
-              </div>
+              {showStreamForm ? (
+                <>
+                  <h2 className="text-2xl font-bold text-white mb-4 text-center">Set Up Your Live Stream</h2>
+                  <p className="text-gray-300 mb-6 text-center max-w-lg">Fill in the details below before going live</p>
+                  
+                  <div className="w-full max-w-2xl space-y-4">
+                    {/* Title */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Stream Title <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={streamDetails.title}
+                        onChange={(e) => setStreamDetails({ ...streamDetails, title: e.target.value })}
+                        placeholder="e.g., Building a React App with TypeScript"
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Description <span className="text-red-400">*</span>
+                      </label>
+                      <textarea
+                        value={streamDetails.description}
+                        onChange={(e) => setStreamDetails({ ...streamDetails, description: e.target.value })}
+                        placeholder="Describe what you'll be working on..."
+                        rows={3}
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Category <span className="text-red-400">*</span>
+                      </label>
+                      <select
+                        value={streamDetails.category}
+                        onChange={(e) => setStreamDetails({ ...streamDetails, category: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Web Development">Web Development</option>
+                        <option value="AI & Machine Learning">AI & Machine Learning</option>
+                        <option value="Mobile Development">Mobile Development</option>
+                        <option value="DevOps">DevOps</option>
+                        <option value="Database">Database</option>
+                        <option value="Cyber Security">Cyber Security</option>
+                        <option value="AWS Cloud">AWS Cloud</option>
+                        <option value="Game Development">Game Development</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Tags (comma separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={streamDetails.tags}
+                        onChange={(e) => setStreamDetails({ ...streamDetails, tags: e.target.value })}
+                        placeholder="e.g., react, typescript, tutorial"
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      onClick={() => {
+                        if (!streamDetails.title.trim() || !streamDetails.description.trim()) {
+                          alert('Please fill in the title and description');
+                          return;
+                        }
+                        setShowStreamForm(false);
+                      }}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+                    >
+                      Continue to Go Live →
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold text-white mb-2 text-center">Go Live Now</h2>
+                  <div className="text-center mb-4">
+                    <p className="text-blue-300 font-semibold">{streamDetails.title}</p>
+                    <p className="text-gray-400 text-sm">{streamDetails.category}</p>
+                  </div>
+                  <p className="text-gray-300 mb-6 text-center max-w-lg">Start your live stream instantly from your browser. Allow camera and microphone access, then click below to go live!</p>
+                  <div className="w-full">
+                    <LiveKitGoLive 
+                      roomName={params.id} 
+                      userName={`User_${Date.now()}`}
+                      streamTitle={streamDetails.title}
+                      streamDescription={streamDetails.description}
+                      streamCategory={streamDetails.category}
+                      streamTags={streamDetails.tags}
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowStreamForm(true)}
+                    className="mt-4 text-gray-400 hover:text-white text-sm underline"
+                  >
+                    ← Edit Stream Details
+                  </button>
+                </>
+              )}
             </div>
           </div>
           {/* Chat Section (right) */}
