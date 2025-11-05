@@ -21,8 +21,8 @@ export default function StreamCard({ stream }: StreamCardProps) {
           {stream.is_live ? (
             <div className="w-full h-full flex items-center justify-center bg-black">
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-white">Nextwork.org</h2>
-                <p className="text-2xl text-gray-300 mt-2">Classroom</p>
+                <h2 className="text-2xl font-light text-white">Nextwork.org</h2>
+                <p className="text-lg font-light text-gray-300 mt-1">Classroom</p>
               </div>
             </div>
           ) : stream.thumbnail_url ? (
