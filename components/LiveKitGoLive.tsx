@@ -294,7 +294,7 @@ function RecordingManager({
 
                 recorder.onstop = () => {
                     console.log('Recording stopped, total chunks:', chunks.length);
-                    setRecordedChunks(chunks);
+                    setRecordedChunks(prevChunks => [...prevChunks, ...chunks]);
                 };
 
                 // Start recording (collect data every 1 second)
