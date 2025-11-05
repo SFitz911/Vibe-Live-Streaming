@@ -33,6 +33,7 @@ export default function Navigation() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/discover', label: 'Discover', icon: Compass },
     { href: '/dashboard', label: 'Dashboard', icon: Radio },
+    { href: '/dashboard/stream/setup', label: 'Help & Troubleshooting', icon: Settings },
   ]
 
   return (

@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
-import { Flame, TrendingUp, Users, Play, Star, Zap, Eye } from 'lucide-react'
+import { Flame, TrendingUp, Users, Play, Star, Zap, Eye, Settings, Compass, BookOpen, HelpCircle, FileText } from 'lucide-react'
 import Link from 'next/link'
 
 export const revalidate = 0
@@ -12,7 +12,7 @@ async function getLiveStreams() {
     .from('streams')
     .select(`
       *,
-      profiles:user_id (
+      profiles (
         username,
         display_name,
         avatar_url,
@@ -36,13 +36,15 @@ async function getRecentStreams() {
     .from('streams')
     .select(`
       *,
-      profiles:user_id (
+      profiles (
         username,
         display_name,
         avatar_url,
         is_verified
       )
     `)
+    .eq('is_live', false)  // Only show recorded streams (not currently live)
+    .order('viewer_count', { ascending: false })  // Most viewed first
     .order('created_at', { ascending: false })
     .limit(12)
 
@@ -78,11 +80,7 @@ export default async function HomePage() {
               Live coding sessions for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard/stream/setup" className="btn-primary text-lg px-8 py-4">
-                <Play className="mr-2" size={20} />
-                Start Streaming
-              </Link>
-              <Link href="/discover" className="btn-secondary text-lg px-8 py-4">
+              <Link href="/discover" className="btn-primary text-lg px-8 py-4">
                 <Users className="mr-2" size={20} />
                 Discover Streams
               </Link>
@@ -131,10 +129,6 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-foreground mb-2">No Live Streams</h3>
               <p className="text-muted-foreground mb-6">Be the first to go live and start streaming!</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/dashboard/stream/setup" className="btn-primary">
-                  <Zap className="mr-2" size={18} />
-                  Start Your Stream
-                </Link>
                 <Link href="/stream/demo-live" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
                   <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
                   Go Live Now
@@ -142,6 +136,10 @@ export default async function HomePage() {
                 <Link href="/stream/latest" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center">
                   <Eye className="mr-2" size={18} />
                   View Live Event
+                </Link>
+                <Link href="/discover" className="btn-secondary">
+                  <Compass className="mr-2" size={18} />
+                  Browse Streams
                 </Link>
               </div>
             </div>
@@ -157,7 +155,10 @@ export default async function HomePage() {
               <div className="p-2 bg-blue-500/20 rounded-lg">
                 <TrendingUp className="text-blue-500" size={24} />
               </div>
-              <h2 className="text-3xl font-bold text-foreground">Trending</h2>
+              <h2 className="text-3xl font-bold text-foreground">Recorded Sessions</h2>
+              <span className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-sm font-medium">
+                Watch Anytime
+              </span>
             </div>
             <Link href="/discover" className="text-primary hover:text-primary/80 transition-colors font-medium">
               View All →
@@ -175,8 +176,8 @@ export default async function HomePage() {
               <div className="w-24 h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Star className="w-12 h-12 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No Recent Streams</h3>
-              <p className="text-muted-foreground">Check back later for new content!</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No Recorded Streams Yet</h3>
+              <p className="text-muted-foreground">Past streams will appear here once they're recorded!</p>
             </div>
           )}
         </div>
@@ -216,6 +217,106 @@ export default async function HomePage() {
               <h3 className="text-xl font-semibold text-foreground mb-4">Expert Support</h3>
               <p className="text-muted-foreground">Professional help is just one click away - the Nextwork staff is always here to guide and support you.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Resources Footer Section */}
+      <section className="py-16 bg-gray-900 border-t border-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
+                  <Play className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold gradient-text">Vibe Coding Live</span>
+              </div>
+              <p className="text-sm text-gray-400">
+                Live coding sessions for IT learners and professionals. Learn, build, and grow together.
+              </p>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Help & Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/dashboard/stream/setup" className="text-sm text-gray-400 hover:text-primary transition-colors flex items-center">
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    Troubleshooting
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/stream/demo-live" className="text-sm text-gray-400 hover:text-primary transition-colors flex items-center">
+                    <Play className="w-4 h-4 mr-2" />
+                    Test Your Stream
+                  </Link>
+                </li>
+                <li>
+                  <a href="https://nextwork.org" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 hover:text-primary transition-colors flex items-center">
+                    <Users className="w-4 h-4 mr-2" />
+                    Contact Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Community */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Community</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/discover" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Discover Streams
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Creator Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <a href="https://nextwork.org" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Nextwork.org
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Get Started</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/stream/demo-live" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Go Live Now
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/login" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Sign In
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/stream/setup" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Troubleshooting
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+            <p className="text-sm text-gray-500">
+              © {new Date().getFullYear()} Vibe Coding Live by{' '}
+              <a href="https://nextwork.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                Nextwork.org
+              </a>
+              . Built for learners, by learners.
+            </p>
           </div>
         </div>
       </section>

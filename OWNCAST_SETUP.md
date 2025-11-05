@@ -108,6 +108,21 @@ sudo ufw allow 22
 1. **Update nginx.conf**
    ```nginx
    server_name your-domain.com www.your-domain.com;
+
+   **What is nginx**
+   Nginx is an open-source software that can:
+
+Serve static content like HTML, CSS, images, and videos.
+
+Act as a reverse proxy — sitting in front of web apps to route requests to backend servers (like Node.js, Python, or PHP).
+
+Load balance across multiple servers to distribute traffic evenly.
+
+Cache responses for faster performance and reduced load.
+
+Terminate SSL/TLS — handle HTTPS connections before passing requests to other services.
+
+
    ```
 
 2. **Update DNS Records**

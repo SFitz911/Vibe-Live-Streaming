@@ -1,0 +1,10 @@
+// This file is for LiveKit TrackPublication type notes.
+// TrackPublication (from livekit-client) is the type returned by useLocalParticipant().cameraTrack and .microphoneTrack.
+// It does NOT have a .publication property. The mute/unmute methods are on the TrackPublication itself.
+// So, to mute/unmute, call cameraTrack.mute() or cameraTrack.unmute().
+// The isMuted property is also on the TrackPublication.
+//
+// Example:
+//   if (cameraTrack.isMuted) { cameraTrack.unmute(); } else { cameraTrack.mute(); }
+//
+// See: https://docs.livekit.io/client-sdk-js/interfaces/TrackPublication.html

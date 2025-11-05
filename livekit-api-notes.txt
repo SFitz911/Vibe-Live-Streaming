@@ -1,0 +1,13 @@
+// This file is for LiveKit API notes and troubleshooting.
+// LiveKit track muting/unmuting in JS/TS:
+// - The correct way to mute/unmute a local video/audio track is to use the `mute()` and `unmute()` methods on the track publication, not on the track itself.
+// - The `LocalTrackPublication` object (from the participant's `trackPublications`) has `mute()` and `unmute()` methods.
+// - The `track` object (LocalVideoTrack/LocalAudioTrack) does NOT have setEnabled, mute, or unmute methods.
+// - To toggle camera/mic, find the publication for the video/audio track and call `mute()` or `unmute()`.
+// Example:
+//   localParticipant.getTrackPublication(trackSid).mute();
+//   localParticipant.getTrackPublication(trackSid).unmute();
+//
+// The `isMuted` property is on the publication, not the track.
+//
+// See: https://docs.livekit.io/client-sdk-js/classes/LocalTrackPublication.html

@@ -17,7 +17,15 @@ export default function StreamCard({ stream }: StreamCardProps) {
       <div className="stream-card card overflow-hidden">
         {/* Thumbnail */}
         <div className="relative aspect-video bg-muted overflow-hidden">
-          {stream.thumbnail_url ? (
+          {/* Show Nextwork logo for LIVE streams, actual thumbnail for RECORDED */}
+          {stream.is_live ? (
+            <div className="w-full h-full flex items-center justify-center bg-black">
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-white">Nextwork.org</h2>
+                <p className="text-2xl text-gray-300 mt-2">Classroom</p>
+              </div>
+            </div>
+          ) : stream.thumbnail_url ? (
             <img
               src={stream.thumbnail_url}
               alt={stream.title}
@@ -33,11 +41,18 @@ export default function StreamCard({ stream }: StreamCardProps) {
           )}
           
           {/* Live Badge */}
-          {stream.is_live && (
+          {stream.is_live ? (
             <div className="absolute top-3 left-3">
               <div className="live-pulse bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-2">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 <span>LIVE</span>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute top-3 left-3">
+              <div className="glass-effect bg-gray-800/80 text-gray-200 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                <Play className="w-3 h-3" />
+                <span>RECORDED</span>
               </div>
             </div>
           )}
