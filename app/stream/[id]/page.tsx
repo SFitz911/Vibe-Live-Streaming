@@ -101,6 +101,20 @@ export default function StreamPage({
         setStream(null)
       } else {
         setStream(data)
+        
+        // Populate form with existing stream data if available
+        if ((data as any).title || (data as any).description || (data as any).category) {
+          setStreamDetails({
+            title: (data as any).title || '',
+            description: (data as any).description || '',
+            category: (data as any).category || 'Web Development',
+            tags: (data as any).tags ? (data as any).tags.join(', ') : '',
+          })
+          // If stream has all details, hide the form and go straight to "Go Live" button
+          if ((data as any).title && (data as any).category) {
+            setShowStreamForm(false)
+          }
+        }
       }
       
       setStreamLoading(false)
@@ -235,8 +249,13 @@ export default function StreamPage({
   }
 
   // Determine if this is a "Go Live" page or a "Watch Recording" page
-  const isGoLivePage = stream.isGoLivePage || (stream.is_live && stream.user_id === user?.id)
-  const isRecordedStream = !stream.is_live && stream.playback_url
+  // Show Go Live interface if:
+  // 1. It's the demo-live page (stream.isGoLivePage)
+  // 2. Stream belongs to current user and is currently live
+  // 3. Stream belongs to current user and hasn't gone live yet (newly created)
+  const isOwner = stream.user_id === user?.id
+  const isGoLivePage = stream.isGoLivePage || isOwner
+  const isRecordedStream = !stream.is_live && stream.playback_url && !isOwner
 
   return (
     <main className="min-h-screen bg-gray-950">
