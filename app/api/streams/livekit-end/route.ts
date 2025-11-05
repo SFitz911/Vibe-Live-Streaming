@@ -19,12 +19,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the stream to mark it as ended
+    const updateData: any = {
+      is_live: false,
+      ended_at: new Date().toISOString(),
+    }
+    
     const { error } = await supabase
       .from('streams')
-      .update({
-        is_live: false,
-        ended_at: new Date().toISOString(),
-      } as any)
+      .update(updateData)
       .eq('id', streamId)
 
     if (error) {
