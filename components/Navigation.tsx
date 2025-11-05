@@ -6,24 +6,48 @@ import { Home, Compass, Radio, User, LogIn, LogOut, Search, Bell, Settings } fro
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
 import { User as SupabaseUser } from '@supabase/supabase-js'
+import UserLevelBadge, { calculateUserLevel } from './UserLevelBadge'
 
 export default function Navigation() {
   const pathname = usePathname()
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [userStreams, setUserStreams] = useState<any[]>([])
+  const [userLevel, setUserLevel] = useState({ level: 1, totalPoints: 0 })
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchUserStreams(session.user.id)
+      }
     })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchUserStreams(session.user.id)
+      } else {
+        setUserStreams([])
+        setUserLevel({ level: 1, totalPoints: 0 })
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [])
+
+  const fetchUserStreams = async (userId: string) => {
+    const { data } = await supabase
+      .from('streams')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (data) {
+      setUserStreams(data)
+      setUserLevel(calculateUserLevel(data))
+    }
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -88,11 +112,14 @@ export default function Navigation() {
                   <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center">
                     <User size={16} className="text-white" />
                   </div>
-                  <div className="hidden md:block">
-                    <p className="text-sm font-medium text-foreground">
-                      {user.email?.split('@')[0] || 'User'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Streamer</p>
+                  <div className="hidden md:flex items-center space-x-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {user.email?.split('@')[0] || 'User'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Streamer</p>
+                    </div>
+                    <UserLevelBadge totalPoints={userLevel.totalPoints} size="small" />
                   </div>
                 </div>
 

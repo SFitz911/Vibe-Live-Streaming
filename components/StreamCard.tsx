@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { Stream, Profile } from '@/lib/supabase'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Clock, Play, User, Verified } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import UserLevelBadge, { calculateUserLevel } from './UserLevelBadge'
 
 interface StreamCardProps {
   stream: Stream & {
@@ -12,6 +15,26 @@ interface StreamCardProps {
 }
 
 export default function StreamCard({ stream }: StreamCardProps) {
+  const [streamerLevel, setStreamerLevel] = useState({ level: 1, totalPoints: 0 })
+
+  useEffect(() => {
+    // Fetch streamer's total stats to calculate level
+    const fetchStreamerLevel = async () => {
+      if (stream.user_id) {
+        const { data } = await supabase
+          .from('streams')
+          .select('*')
+          .eq('user_id', stream.user_id)
+
+        if (data) {
+          setStreamerLevel(calculateUserLevel(data))
+        }
+      }
+    }
+
+    fetchStreamerLevel()
+  }, [stream.user_id])
+
   return (
     <Link href={`/stream/${stream.id}`} className="group">
       <div className="stream-card card overflow-hidden">
@@ -101,13 +124,14 @@ export default function StreamCard({ stream }: StreamCardProps) {
                 {stream.title}
               </h3>
               
-              <div className="flex items-center space-x-1 mt-1">
+              <div className="flex items-center space-x-2 mt-1">
                 <p className="text-sm text-muted-foreground truncate">
                   {stream.profiles?.display_name || stream.profiles?.username || 'Unknown'}
                 </p>
                 {stream.profiles?.is_verified && (
-                  <Verified className="w-4 h-4 text-primary" />
+                  <Verified className="w-4 h-4 text-primary flex-shrink-0" />
                 )}
+                <UserLevelBadge totalPoints={streamerLevel.totalPoints} size="small" />
               </div>
               
               {stream.category && (
