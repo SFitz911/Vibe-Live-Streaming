@@ -111,7 +111,7 @@ export default function NewStreamPage() {
               href="/dashboard/stream/setup"
               className="text-primary-400 hover:text-primary-300 underline text-sm"
             >
-              Need help setting up OBS? View streaming setup guide →
+              Streaming Help & Troubleshooting →
             </a>
           </div>
         </div>
