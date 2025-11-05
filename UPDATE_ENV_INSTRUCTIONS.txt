@@ -1,0 +1,32 @@
+===========================================
+UPDATE YOUR .env.local FILE
+===========================================
+
+REPLACE these lines in your .env.local:
+
+OLD (Development):
+-------------------
+NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
+LIVEKIT_API_KEY=devkey
+LIVEKIT_API_SECRET=secret
+
+NEW (LiveKit Cloud - Production Ready):
+-----------------------------------------
+NEXT_PUBLIC_LIVEKIT_URL=wss://videostreamv5-yz05w4m7.livekit.cloud
+LIVEKIT_API_KEY=APItzRyhtWbXm34
+LIVEKIT_API_SECRET=7ODDtDWt8RVgdfVTVFl199LSEABNAsN3MI9Q5s7LwtA
+
+===========================================
+STEPS:
+===========================================
+1. Open: .env.local (in your project root)
+2. Find the LiveKit section (lines 18-21)
+3. Replace the 3 lines above
+4. Save the file
+5. Restart your dev server: Ctrl+C then npm run dev
+
+Note: You can still use Docker for local testing,
+but now your local app will use LiveKit Cloud instead!
+
+===========================================
+
