@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       .update({
         is_live: false,
         ended_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('id', streamId)
 
     if (error) {
