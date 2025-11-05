@@ -53,6 +53,29 @@ export default function VideoPlayer({
     )
   }
 
+  // Check if URL is a direct video file (webm, mp4, etc.)
+  const isDirectVideo = playbackUrl.match(/\.(webm|mp4|mov|avi)(\?|$)/i)
+
+  // If it's a direct video file, use native video player
+  if (isDirectVideo) {
+    return (
+      <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+        <video
+          ref={videoRef}
+          src={playbackUrl}
+          className="absolute inset-0 w-full h-full"
+          controls
+          autoPlay={autoplay}
+          muted={muted}
+          playsInline
+          crossOrigin="anonymous"
+        >
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    )
+  }
+
   useEffect(() => {
     if (!videoRef.current || !playbackUrl) return
 
@@ -114,11 +137,12 @@ export default function VideoPlayer({
     }
   }, [playbackUrl, autoplay])
 
+  // Otherwise, treat as HLS stream (for live streams or .m3u8 URLs)
   return (
-    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+    <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
       <video
         ref={videoRef}
-        className="w-full h-full"
+        className="absolute inset-0 w-full h-full"
         controls
         autoPlay={autoplay}
         muted={muted}
