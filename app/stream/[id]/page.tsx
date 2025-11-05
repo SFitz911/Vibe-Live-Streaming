@@ -249,13 +249,22 @@ export default function StreamPage({
   }
 
   // Determine if this is a "Go Live" page or a "Watch Recording" page
-  // Show Go Live interface if:
-  // 1. It's the demo-live page (stream.isGoLivePage)
-  // 2. Stream belongs to current user and is currently live
-  // 3. Stream belongs to current user and hasn't gone live yet (newly created)
   const isOwner = stream.user_id === user?.id
-  const isGoLivePage = stream.isGoLivePage || isOwner
-  const isRecordedStream = !stream.is_live && stream.playback_url && !isOwner
+  
+  // Check if stream has a valid recording (Supabase .webm or YouTube URL)
+  const hasValidRecording = stream.playback_url && (
+    stream.playback_url.includes('supabase') || 
+    stream.playback_url.includes('youtube.com') ||
+    stream.playback_url.includes('youtu.be')
+  )
+  
+  // Show recorded video player if stream is not live AND has a valid playback URL
+  const isRecordedStream = !stream.is_live && hasValidRecording
+  
+  // Show Go Live interface if:
+  // 1. It's the demo-live page (stream.isGoLivePage), OR
+  // 2. User owns the stream AND it's NOT a finished recording
+  const isGoLivePage = stream.isGoLivePage || (isOwner && !isRecordedStream)
 
   return (
     <main className="min-h-screen bg-gray-950">
