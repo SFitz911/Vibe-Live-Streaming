@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import { supabase, Stream } from '@/lib/supabase'
-import { Video, Plus, Settings, BarChart3, Users } from 'lucide-react'
+import { Video, Plus, Settings, BarChart3, Users, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 
@@ -40,6 +40,30 @@ export default function DashboardPage() {
 
     if (data && !error) {
       setStreams(data)
+    }
+  }
+
+  const handleDeleteStream = async (streamId: string) => {
+    if (!confirm('Are you sure you want to delete this stream? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/streams/${streamId}/delete`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        // Remove from local state
+        setStreams(streams.filter(s => s.id !== streamId))
+        alert('Stream deleted successfully!')
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete stream: ${error.message}`)
+      }
+    } catch (error) {
+      console.error('Error deleting stream:', error)
+      alert('Failed to delete stream')
     }
   }
 
@@ -173,6 +197,16 @@ export default function DashboardPage() {
                       {stream.is_live && (
                         <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
                           End Stream
+                        </button>
+                      )}
+                      {!stream.is_live && (
+                        <button
+                          onClick={() => handleDeleteStream(stream.id)}
+                          className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-2 border border-red-600/30 hover:border-red-600"
+                          title="Delete this recording"
+                        >
+                          <Trash2 size={16} />
+                          <span>Delete</span>
                         </button>
                       )}
                     </div>
