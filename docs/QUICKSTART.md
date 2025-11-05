@@ -1,6 +1,36 @@
-# 🚀 Quick Start Guide - Vibe Live
+# 🚀 Quick Start Guide
 
-Get up and running in 5 minutes!
+**For experienced developers - get running in 15 minutes!**
+
+**Prerequisites:** Node.js, Git, Docker installed  
+**Time:** 15-30 minutes  
+**Difficulty:** Easy (if you know the tools)
+
+---
+
+## 📋 Table of Contents
+
+1. [Decision Tree](#decision-tree)
+2. [Fast Setup](#fast-setup)
+3. [What You Can Do](#what-you-can-do-now)
+4. [Key Features](#key-features)
+5. [Common Commands](#common-commands)
+6. [Troubleshooting](#troubleshooting)
+7. [Next Steps](#next-steps)
+
+---
+
+## 🌳 Decision Tree
+
+```
+Do you have Node.js + Git + Docker?
+    |
+    ├─ YES → Continue below
+    |
+    └─ NO → Read GETTING_STARTED_COMPLETE_BEGINNER.md first
+```
+
+---
 
 ## ⚡ Fast Setup
 
@@ -11,31 +41,35 @@ npm install
 
 ### 2. Update Environment Variables
 
-Your Supabase project is already set up! Just update `.env.local` (create it if it doesn't exist):
+Create `.env.local` from the template:
 
-\`\`\`env
-# ✅ Supabase - Already Configured!
-NEXT_PUBLIC_SUPABASE_URL=https://zbiwmgtvxlurqyfrzjhd.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpiaXdtZ3R2eGx1cnF5ZnJ6amhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5Mzg3MjYsImV4cCI6MjA3NjUxNDcyNn0.M0Zb96jq4vYUz0vOBhc_1pVvDOJ3AqkWc4sDGdR6tno
-SUPABASE_SERVICE_ROLE_KEY=get_from_supabase_dashboard
+```bash
+cp env.example .env.local
+```
 
-# 🔧 AWS - Set these up (see AWS_SETUP.md)
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-AWS_S3_BUCKET=your-bucket
-AWS_CLOUDFRONT_DOMAIN=your-cdn.cloudfront.net
-AWS_IVS_CHANNEL_ARN=arn:aws:ivs:...
-AWS_IVS_PLAYBACK_URL=https://...
+**Update with YOUR Supabase credentials:**
 
-# 🌐 App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-\`\`\`
+```env
+# Supabase Configuration (REQUIRED)
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_public_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+SUPABASE_ANON_KEY=your_anon_public_key_here
 
-**Get Service Role Key:**
-1. Go to [Supabase Dashboard](https://supabase.com/dashboard/project/zbiwmgtvxlurqyfrzjhd/settings/api)
-2. Copy the `service_role` key (secret!)
-3. Paste it in `.env.local`
+# LiveKit Configuration (Local Development)
+NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
+LIVEKIT_API_KEY=devkey
+LIVEKIT_API_SECRET=secret
+```
+
+**Get YOUR Supabase keys:**
+1. Go to: https://supabase.com/dashboard
+2. Select your project (or create new one)
+3. Click **Settings** → **API**
+4. Copy **Project URL** and **anon public** key
+5. Click "Reveal" to get **service_role** key
+6. Paste all three in `.env.local`
 
 ### 3. Run Development Server
 \`\`\`bash
