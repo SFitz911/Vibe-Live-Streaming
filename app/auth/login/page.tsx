@@ -83,13 +83,24 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-gray-400 text-sm">
               Don't have an account?{' '}
               <Link href="/auth/signup" className="text-blue-400 hover:text-blue-300 font-semibold">
                 Sign up
               </Link>
             </p>
+            
+            {/* Demo Mode Link */}
+            <div className="pt-3 border-t border-gray-800">
+              <Link 
+                href="/auth/demo-login"
+                className="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 font-semibold text-sm transition-colors"
+              >
+                <span>⚡</span>
+                <span>Quick Demo Access (No Password Required)</span>
+              </Link>
+            </div>
           </div>
         </div>
 

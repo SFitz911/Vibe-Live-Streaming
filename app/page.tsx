@@ -125,6 +125,17 @@ export default function HomePage() {
                 View Live Event
               </Link>
             </div>
+            
+            {/* Demo Access Button */}
+            <div className="mt-8">
+              <Link 
+                href="/auth/demo-login"
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl"
+              >
+                <Zap className="h-5 w-5" />
+                <span>⚡ Quick Demo Access - No Password</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
