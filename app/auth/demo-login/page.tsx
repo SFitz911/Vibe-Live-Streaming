@@ -47,8 +47,8 @@ export default function DemoLoginPage() {
         return
       }
 
-      // Success! Redirect to dashboard
-      router.push('/dashboard')
+      // Success! Redirect to homepage
+      router.push('/')
     } catch (err) {
       setError('Something went wrong. Please try again.')
       setLoading(false)
@@ -126,7 +126,7 @@ export default function DemoLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="w-full bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white py-3 px-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 {loading ? (
                   <>

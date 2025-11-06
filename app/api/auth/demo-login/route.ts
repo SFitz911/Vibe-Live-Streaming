@@ -57,24 +57,53 @@ export async function POST(request: NextRequest) {
 
       userId = newUser.user.id
 
-      // Create profile for new user
+      // Create profile for new user (with @nextwork.org auto-admin)
       const emailPrefix = normalizedEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
       const username = emailPrefix + '_' + userId.substring(0, 6)
       const displayName = normalizedEmail.split('@')[0]
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          username,
-          display_name: displayName,
-          is_streamer: true,
-          is_verified: false,
+      // Use enhanced upsert function (handles duplicates + auto-admin)
+      try {
+        await supabase.rpc('upsert_demo_profile', {
+          p_id: userId,
+          p_email: normalizedEmail,
+          p_username: username,
+          p_display_name: displayName
         })
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError)
-        // Continue anyway - profile might be created by trigger
+      } catch (rpcError) {
+        console.error('Primary RPC failed, trying direct insert:', rpcError)
+        
+        // Fallback: Direct insert with @nextwork.org check
+        const isNextworkAdmin = normalizedEmail.toLowerCase().endsWith('@nextwork.org')
+        
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            username,
+            display_name: displayName,
+            is_streamer: true,
+            is_verified: isNextworkAdmin,
+            is_nextwork_admin: isNextworkAdmin,
+          })
+        
+        if (profileError) {
+          console.error('Fallback insert also failed:', profileError)
+        }
+      }
+      
+      // Verify profile was created (always succeeds for demo)
+      const { data: profileCheck } = await supabase
+        .from('profiles')
+        .select('id, is_nextwork_admin, username')
+        .eq('id', userId)
+        .single()
+      
+      if (profileCheck) {
+        console.log('✅ Profile created:', profileCheck.username, 
+          profileCheck.is_nextwork_admin ? '(Staff-Expert)' : '')
+      } else {
+        console.warn('Profile verification skipped for user:', userId)
       }
     }
 

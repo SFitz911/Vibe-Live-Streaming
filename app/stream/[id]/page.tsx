@@ -180,13 +180,13 @@ export default function StreamPage({
             <div className="flex gap-4 justify-center">
               <a
                 href="/auth/login"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 Sign In
               </a>
               <a
                 href="/auth/signup"
-                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="bg-gray-500/20 hover:bg-gray-500/30 border-2 border-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 Create Account
               </a>
@@ -272,7 +272,7 @@ export default function StreamPage({
             <div className="text-6xl mb-4">📹</div>
             <h2 className="text-2xl font-bold text-white mb-4">Stream Not Found</h2>
             <p className="text-gray-400 mb-6">This stream doesn't exist or has been deleted.</p>
-            <a href="/discover" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+            <a href="/discover" className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
               Browse Live Streams
             </a>
           </div>
@@ -348,7 +348,7 @@ export default function StreamPage({
                       </div>
                       <button
                         onClick={() => router.push(`/stream/${activeStream.id}`)}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+                        className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
                       >
                         Return to Stream
                       </button>
@@ -363,12 +363,20 @@ export default function StreamPage({
                       </label>
                       <input
                         type="text"
-                        value={profile ? `${profile.display_name || profile.username} (@${profile.username})` : 'Loading...'}
+                        value={
+                          profile 
+                            ? `${profile.display_name || profile.username} (@${profile.username})` 
+                            : user?.email 
+                            ? user.email.split('@')[0] + ' (Preparing profile...)'
+                            : 'Loading...'
+                        }
                         readOnly
                         disabled
                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-300 cursor-not-allowed"
                       />
-                      <p className="text-xs text-gray-500 mt-1">This is automatically set based on your account</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {!profile && user ? '⚠️ Profile loading - if this persists, refresh the page' : 'This is automatically set based on your account'}
+                      </p>
                     </div>
 
                     {/* Title */}
@@ -447,7 +455,7 @@ export default function StreamPage({
                         }
                         setShowStreamForm(false);
                       }}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+                      className="w-full bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
                     >
                       Continue to Go Live →
                     </button>
@@ -491,7 +499,7 @@ export default function StreamPage({
                 </p>
                 <a
                   href="/discover"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Browse Live Streams
                 </a>

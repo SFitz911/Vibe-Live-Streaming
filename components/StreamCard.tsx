@@ -20,6 +20,9 @@ export default function StreamCard({ stream }: StreamCardProps) {
   const { user } = useAuth()
   const [streamerLevel, setStreamerLevel] = useState({ level: 1, totalPoints: 0 })
   const [likeCount, setLikeCount] = useState(0)
+  
+  // Check if stream is recently live (ended but still showing in Live Now)
+  const isRecentlyLive = !stream.is_live && stream.recently_live_until && new Date(stream.recently_live_until) > new Date()
 
   useEffect(() => {
     // Fetch streamer's total stats to calculate level
@@ -104,6 +107,13 @@ export default function StreamCard({ stream }: StreamCardProps) {
                 <span>LIVE</span>
               </div>
             </div>
+          ) : isRecentlyLive ? (
+            <div className="absolute top-3 left-3">
+              <div className="bg-orange-500/90 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-2">
+                <Clock className="w-3 h-3" />
+                <span>RECENTLY LIVE</span>
+              </div>
+            </div>
           ) : (
             <div className="absolute top-3 left-3">
               <div className="glass-effect bg-gray-800/80 text-gray-200 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
@@ -114,7 +124,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
           )}
           
           {/* Viewer Count */}
-          {stream.is_live && (
+          {(stream.is_live || isRecentlyLive) && (
             <div className="absolute bottom-3 left-3">
               <div className="glass-effect text-white px-3 py-1 rounded-full text-xs flex items-center space-x-1">
                 <Eye className="w-3 h-3" />
@@ -133,7 +143,13 @@ export default function StreamCard({ stream }: StreamCardProps) {
           </div>
 
           {/* Like Button - Bottom Right Corner */}
-          <div className="absolute bottom-0 right-0 z-20" onClick={(e) => e.preventDefault()}>
+          <div 
+            className="absolute bottom-0 right-0 z-20" 
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
             <LikeButton 
               streamId={stream.id} 
               userId={user?.id}

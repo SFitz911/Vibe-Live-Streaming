@@ -153,7 +153,7 @@ export default function DashboardPage() {
   const liveStream = streams.find(s => s.is_live)
   const totalViews = streams.reduce((acc, s) => acc + s.viewer_count, 0)
   const { level, totalPoints, breakdown } = calculateUserLevel(streams, projectsCompleted, totalLikesReceived)
-  const isNextworkAdmin = user?.email?.endsWith('@nextwork.org')
+  const isNextworkAdmin = true // Show admin button to everyone for demo
 
   return (
     <main className="min-h-screen bg-gray-950">
@@ -173,7 +173,7 @@ export default function DashboardPage() {
             {isNextworkAdmin && (
               <Link
                 href="/dashboard/admin"
-                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 shadow-lg"
+                className="bg-yellow-500/20 hover:bg-yellow-500/30 border-2 border-yellow-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2"
               >
                 <Shield className="h-5 w-5" />
                 <span>Admin Dashboard</span>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={() => router.push(`/stream/${activeStream.id}`)}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+              className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white font-medium rounded-lg transition-colors"
             >
               Go to Stream
             </button>
@@ -277,20 +277,20 @@ export default function DashboardPage() {
 
             <Link
               href="/dashboard/import-youtube"
-              className="bg-red-600 hover:bg-red-700 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
+              className="bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
             >
               <Youtube className="h-6 w-6" />
               <span className="font-semibold">Import YouTube</span>
             </Link>
             
-            <button className="bg-gray-900 hover:bg-gray-800 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors border border-gray-800">
+            <button className="bg-purple-500/20 hover:bg-purple-500/30 border-2 border-purple-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors">
               <Settings className="h-6 w-6" />
               <span className="font-semibold">Stream Settings</span>
             </button>
 
             <Link
               href="/dashboard/analytics"
-              className="bg-gray-900 hover:bg-gray-800 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors border border-gray-800"
+              className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
             >
               <BarChart3 className="h-6 w-6" />
               <span className="font-semibold">View Analytics</span>
@@ -330,14 +330,14 @@ export default function DashboardPage() {
                     <div className="flex items-center space-x-2">
                       <Link
                         href={`/stream/${stream.id}`}
-                        className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                        className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                       >
                         View Stream
                       </Link>
                       {stream.is_live && (
                         <button
                           onClick={() => handleEndStream(stream.id)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                          className="bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                         >
                           End Stream
                         </button>
@@ -345,7 +345,7 @@ export default function DashboardPage() {
                       {!stream.is_live && (
                         <button
                           onClick={() => handleDeleteStream(stream.id)}
-                          className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-2 border border-red-600/30 hover:border-red-600"
+                          className="bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-2"
                           title="Delete this recording"
                         >
                           <Trash2 size={16} />

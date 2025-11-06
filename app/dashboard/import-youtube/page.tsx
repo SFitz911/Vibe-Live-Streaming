@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import BackButton from '@/components/BackButton'
 import { useAuth } from '@/lib/auth'
-import { Youtube, Link as LinkIcon, CheckCircle } from 'lucide-react'
+import { Youtube, Link as LinkIcon, CheckCircle, Settings, Shield } from 'lucide-react'
+import Link from 'next/link'
 
 export default function ImportYouTubePage() {
   const router = useRouter()
@@ -71,14 +72,24 @@ export default function ImportYouTubePage() {
           <BackButton href="/dashboard" label="Back to Dashboard" />
         </div>
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
-            <Youtube className="text-red-500 mr-3" size={36} />
-            Import YouTube Video
-          </h1>
-          <p className="text-gray-400">
-            Add your existing YouTube tutorials to your Vibe Coding Live library
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
+              <Youtube className="text-red-500 mr-3" size={36} />
+              Import YouTube Video
+            </h1>
+            <p className="text-gray-400">
+              Add your existing YouTube tutorials to your Vibe Coding Live library
+            </p>
+          </div>
+          
+          <Link
+            href="/dashboard/admin"
+            className="bg-yellow-500/20 hover:bg-yellow-500/30 border-2 border-yellow-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2 text-sm"
+          >
+            <Shield className="h-4 w-4" />
+            <span>Admin</span>
+          </Link>
         </div>
 
         {success && (
@@ -190,7 +201,7 @@ export default function ImportYouTubePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-colors flex items-center justify-center"
+                className="flex-1 bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white px-6 py-3 rounded-lg font-bold transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Youtube className="mr-2" size={20} />
                 {loading ? 'Importing...' : 'Import Video'}
@@ -199,7 +210,7 @@ export default function ImportYouTubePage() {
               <button
                 type="button"
                 onClick={() => router.push('/dashboard')}
-                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors"
+                className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/30 border-2 border-gray-500 text-white rounded-lg font-semibold transition-colors"
               >
                 Cancel
               </button>

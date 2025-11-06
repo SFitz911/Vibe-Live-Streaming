@@ -22,6 +22,9 @@ const CATEGORIES = [
 ]
 
 async function getLiveStreams(category?: string) {
+  // Show streams that are LIVE or recently ended (within 30 minutes)
+  const now = new Date().toISOString()
+  
   let query = supabase
     .from('streams')
     .select(`
@@ -33,7 +36,7 @@ async function getLiveStreams(category?: string) {
         is_verified
       )
     `)
-    .eq('is_live', true)  // Only show live streams
+    .or(`is_live.eq.true,recently_live_until.gte.${now}`)
     .order('viewer_count', { ascending: false })  // Show most popular first
     .order('created_at', { ascending: false })
 
@@ -50,7 +53,7 @@ async function getLiveStreams(category?: string) {
 
   console.log('=== DISCOVER PAGE DEBUG ===')
   console.log('Category filter:', category || 'All')
-  console.log('Live streams found:', data?.length || 0)
+  console.log('Live + Recently Live streams found:', data?.length || 0)
   if (data && data.length > 0) {
     console.log('First stream:', JSON.stringify(data[0], null, 2))
     console.log('Has profiles?', !!data[0].profiles)
@@ -61,10 +64,12 @@ async function getLiveStreams(category?: string) {
 }
 
 async function getCategoryCounts() {
+  const now = new Date().toISOString()
+  
   const { data, error } = await supabase
     .from('streams')
     .select('category')
-    .eq('is_live', true)
+    .or(`is_live.eq.true,recently_live_until.gte.${now}`)
 
   if (error || !data) return {}
 

@@ -45,15 +45,7 @@ export default function AdminPage() {
       return
     }
 
-    // Check if user is Nextwork admin
-    const isNextworkAdmin = user.email?.endsWith('@nextwork.org') || profile?.is_nextwork_admin
-
-    if (!isNextworkAdmin) {
-      alert('Access Denied: This page is only accessible to Nextwork.org staff.')
-      router.push('/dashboard')
-      return
-    }
-
+    // Demo mode - everyone has admin access
     setIsAdmin(true)
     await fetchAllData()
     setLoading(false)
@@ -341,7 +333,7 @@ export default function AdminPage() {
                 />
                 <button
                   onClick={handleSearchUser}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white rounded-lg transition-colors"
                 >
                   <Search className="h-5 w-5" />
                 </button>
@@ -419,7 +411,7 @@ export default function AdminPage() {
                 <button
                   onClick={handleMarkProjectComplete}
                   disabled={!selectedProject || actionLoading}
-                  className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <CheckCircle className="h-5 w-5" />
                   <span>{actionLoading ? 'Processing...' : 'Mark Complete (+20 XP)'}</span>

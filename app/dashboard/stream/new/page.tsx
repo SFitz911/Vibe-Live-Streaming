@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import BackButton from '@/components/BackButton'
 import { supabase } from '@/lib/supabase'
-import { Video, Image as ImageIcon, Tag } from 'lucide-react'
+import { Video, Image as ImageIcon, Tag, Shield } from 'lucide-react'
+import Link from 'next/link'
 
 const CATEGORIES = [
   'AWS Cloud',
@@ -119,21 +120,31 @@ export default function NewStreamPage() {
           <BackButton href="/dashboard" label="Back to Dashboard" />
         </div>
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Create New Stream
-          </h1>
-          <p className="text-gray-400">
-            Set up your stream details before going live
-          </p>
-          <div className="mt-4">
-            <a
-              href="/dashboard/stream/setup"
-              className="text-primary-400 hover:text-primary-300 underline text-sm"
-            >
-              Streaming Help & Troubleshooting →
-            </a>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Create New Stream
+            </h1>
+            <p className="text-gray-400">
+              Set up your stream details before going live
+            </p>
+            <div className="mt-4">
+              <a
+                href="/dashboard/stream/setup"
+                className="text-primary-400 hover:text-primary-300 underline text-sm"
+              >
+                Streaming Help & Troubleshooting →
+              </a>
+            </div>
           </div>
+          
+          <Link
+            href="/dashboard/admin"
+            className="bg-yellow-500/20 hover:bg-yellow-500/30 border-2 border-yellow-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2 text-sm"
+          >
+            <Shield className="h-4 w-4" />
+            <span>Admin</span>
+          </Link>
         </div>
 
         {activeStream && (
@@ -148,7 +159,7 @@ export default function NewStreamPage() {
             </div>
             <button
               onClick={() => router.push(`/stream/${activeStream.id}`)}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+              className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white font-medium rounded-lg transition-colors"
             >
               Return to Stream
             </button>
@@ -243,7 +254,7 @@ export default function NewStreamPage() {
                     type="button"
                     onClick={handleAddTag}
                     disabled={tags.length >= 5 || !tagInput.trim()}
-                    className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-4 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Add
                   </button>
@@ -275,14 +286,14 @@ export default function NewStreamPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-gray-500/20 hover:bg-gray-500/30 border-2 border-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !title || !category}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               <Video className="h-5 w-5" />
               <span>{loading ? 'Creating...' : 'Create Stream'}</span>

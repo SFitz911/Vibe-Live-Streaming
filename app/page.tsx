@@ -24,6 +24,7 @@ export default function HomePage() {
   }, [sortBy, filterCategory])
 
   const fetchLiveStreams = async () => {
+    // Show streams that are LIVE or recently ended (within 30 minutes)
     const { data, error } = await supabase
       .from('streams')
       .select(`
@@ -35,7 +36,7 @@ export default function HomePage() {
           is_verified
         )
       `)
-      .eq('is_live', true)
+      .or(`is_live.eq.true,recently_live_until.gte.${new Date().toISOString()}`)
       .order('viewer_count', { ascending: false })
       .limit(12)
 
@@ -112,28 +113,17 @@ export default function HomePage() {
               Live coding sessions for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/discover" className="btn-primary text-lg px-8 py-4">
+              <Link href="/discover" className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
                 <Users className="mr-2" size={20} />
                 Discover Streams
               </Link>
-              <Link href="/stream/demo-live" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
+              <Link href="/stream/demo-live" className="bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse mr-2"></span>
                 Go Live Now
               </Link>
-              <Link href="/stream/latest" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
+              <Link href="/stream/latest" className="bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
                 <Eye className="mr-2" size={20} />
                 View Live Event
-              </Link>
-            </div>
-            
-            {/* Demo Access Button */}
-            <div className="mt-8">
-              <Link 
-                href="/auth/demo-login"
-                className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl"
-              >
-                <Zap className="h-5 w-5" />
-                <span>⚡ Quick Demo Access - No Password</span>
               </Link>
             </div>
           </div>

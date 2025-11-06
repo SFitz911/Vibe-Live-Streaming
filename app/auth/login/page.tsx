@@ -24,7 +24,7 @@ export default function LoginPage() {
       setError(signInError.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push('/')
     }
   }
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="w-full bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>

@@ -18,22 +18,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update the stream to mark it as ended
-    const { error } = await supabase
+    // Get the current stream data first
+    const { data: currentStream, error: fetchError } = await supabase
+      .from('streams')
+      .select('*')
+      .eq('id', streamId)
+      .single()
+
+    if (fetchError || !currentStream) {
+      console.error('Error fetching stream:', fetchError)
+      return NextResponse.json({ error: 'Stream not found' }, { status: 404 })
+    }
+
+    // Calculate 30 minutes from now
+    const thirtyMinutesFromNow = new Date()
+    thirtyMinutesFromNow.setMinutes(thirtyMinutesFromNow.getMinutes() + 30)
+
+    // Update the stream - mark as ended but keep visible in "Live Now" for 30 min
+    const { error: updateError } = await supabase
       .from('streams')
       .update({
         is_live: false,
         ended_at: new Date().toISOString(),
+        recently_live_until: thirtyMinutesFromNow.toISOString(), // Stay in "Live Now" for 30 min
       })
       .eq('id', streamId)
 
-    if (error) {
-      console.error('Error ending stream:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (updateError) {
+      console.error('Error ending stream:', updateError)
+      return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
 
     return NextResponse.json({ 
-      message: 'Stream ended successfully' 
+      message: 'Stream ended successfully - will remain in Live Now for 30 minutes',
+      recently_live_until: thirtyMinutesFromNow.toISOString()
     }, { status: 200 })
   } catch (error) {
     console.error('Error in livekit-end API:', error)

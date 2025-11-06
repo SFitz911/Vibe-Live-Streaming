@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { 
   BarChart3, TrendingUp, Eye, Clock, Calendar, Award,
-  Users, Video, Star, Zap, Target, Trophy
+  Users, Video, Star, Zap, Target, Trophy, Settings
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -142,23 +142,33 @@ export default function AnalyticsPage() {
             </p>
           </div>
           
-          {/* User Level Badge */}
-          <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-6 text-center min-w-[200px]">
-            <div className="flex items-center justify-center mb-2">
-              <Trophy className="text-yellow-400 mr-2" size={24} />
-              <span className="text-white text-sm font-medium">LEVEL</span>
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/dashboard/admin"
+              className="bg-yellow-500/20 hover:bg-yellow-500/30 border-2 border-yellow-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center space-x-2 text-sm"
+            >
+              <Shield className="h-4 w-4" />
+              <span>Admin</span>
+            </Link>
+            
+            {/* User Level Badge */}
+            <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-6 text-center min-w-[200px]">
+              <div className="flex items-center justify-center mb-2">
+                <Trophy className="text-yellow-400 mr-2" size={24} />
+                <span className="text-white text-sm font-medium">LEVEL</span>
+              </div>
+              <div className="text-6xl font-bold text-white mb-2">{level}</div>
+              <div className="text-yellow-400 text-sm font-semibold mb-3">{totalPoints} XP</div>
+              <div className="w-full bg-white/20 rounded-full h-2 mb-2">
+                <div 
+                  className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${levelProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-white/80">
+                {level === 9 ? '🌟 MAX LEVEL!' : `${pointsToNextLevel} XP to Level ${level + 1}`}
+              </p>
             </div>
-            <div className="text-6xl font-bold text-white mb-2">{level}</div>
-            <div className="text-yellow-400 text-sm font-semibold mb-3">{totalPoints} XP</div>
-            <div className="w-full bg-white/20 rounded-full h-2 mb-2">
-              <div 
-                className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${levelProgress}%` }}
-              />
-            </div>
-            <p className="text-xs text-white/80">
-              {level === 9 ? '🌟 MAX LEVEL!' : `${pointsToNextLevel} XP to Level ${level + 1}`}
-            </p>
           </div>
         </div>
 

@@ -24,7 +24,7 @@ export default function SignupPage() {
       setError(signUpError.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push('/')
     }
   }
 
@@ -79,19 +79,30 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="w-full bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-gray-400 text-sm">
               Already have an account?{' '}
               <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 font-semibold">
                 Sign in
               </Link>
             </p>
+            
+            {/* Demo Mode Link */}
+            <div className="pt-3 border-t border-gray-800">
+              <Link 
+                href="/auth/demo-login"
+                className="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 font-semibold text-sm transition-colors"
+              >
+                <span>⚡</span>
+                <span>Quick Demo Access (No Password Required)</span>
+              </Link>
+            </div>
           </div>
         </div>
 
