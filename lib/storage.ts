@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 const STORAGE_BUCKET = 'stream-recordings'
-const MAX_STORAGE_BYTES = 5 * 1024 * 1024 * 1024 // 5GB in bytes
+const MAX_STORAGE_BYTES = 100 * 1024 * 1024 * 1024 // 100GB in bytes (Supabase Pro)
 
 /**
  * Calculate total storage used in the recordings bucket

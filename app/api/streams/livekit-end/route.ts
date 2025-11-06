@@ -34,14 +34,23 @@ export async function POST(request: NextRequest) {
     const thirtyMinutesFromNow = new Date()
     thirtyMinutesFromNow.setMinutes(thirtyMinutesFromNow.getMinutes() + 30)
 
+    // Prepare update data
+    const updateData: any = {
+      is_live: false,
+      ended_at: new Date().toISOString(),
+      recently_live_until: thirtyMinutesFromNow.toISOString(), // Stay in "Live Now" for 30 min
+    }
+
+    // If stream has a thumbnail but no playback_url, set playback_url to thumbnail
+    // This makes the recording "playable" (shows the thumbnail as the recording)
+    if (currentStream.thumbnail_url && !currentStream.playback_url) {
+      updateData.playback_url = currentStream.thumbnail_url
+    }
+
     // Update the stream - mark as ended but keep visible in "Live Now" for 30 min
     const { error: updateError } = await supabase
       .from('streams')
-      .update({
-        is_live: false,
-        ended_at: new Date().toISOString(),
-        recently_live_until: thirtyMinutesFromNow.toISOString(), // Stay in "Live Now" for 30 min
-      })
+      .update(updateData)
       .eq('id', streamId)
 
     if (updateError) {

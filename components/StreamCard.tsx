@@ -61,10 +61,11 @@ export default function StreamCard({ stream }: StreamCardProps) {
       <div className="stream-card card overflow-hidden">
         {/* Thumbnail */}
         <div className="relative aspect-video bg-muted overflow-hidden">
-          {/* Show video clip for LIVE streams (if captured), Nextwork logo placeholder, or static thumbnail */}
-          {stream.is_live ? (
-            stream.thumbnail_url && stream.thumbnail_url.endsWith('.webm') ? (
-              // Auto-captured live stream thumbnail (3-second video clip)
+          {/* Thumbnail Display Logic */}
+          {stream.thumbnail_url ? (
+            // Check if it's a video thumbnail (.webm) or static image
+            stream.thumbnail_url.endsWith('.webm') ? (
+              // Auto-captured animated thumbnail (3-second video clip)
               <video
                 src={stream.thumbnail_url}
                 autoPlay
@@ -74,23 +75,23 @@ export default function StreamCard({ stream }: StreamCardProps) {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             ) : (
-              // Placeholder for live streams without captured thumbnail yet
-              <div className="w-full h-full flex items-center justify-center bg-black">
-                <div className="text-center">
-                  <h2 className="text-2xl font-light text-white">Nextwork.org</h2>
-                  <p className="text-lg font-light text-gray-300 mt-1">Classroom</p>
-                </div>
-              </div>
+              // Static image thumbnail (YouTube or uploaded)
+              <img
+                src={stream.thumbnail_url}
+                alt={stream.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             )
-          ) : stream.thumbnail_url ? (
-            // Static thumbnail for recorded streams
-            <img
-              src={stream.thumbnail_url}
-              alt={stream.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+          ) : stream.is_live ? (
+            // Live stream without captured thumbnail yet - show placeholder
+            <div className="w-full h-full flex items-center justify-center bg-black">
+              <div className="text-center">
+                <h2 className="text-2xl font-light text-white">Nextwork.org</h2>
+                <p className="text-lg font-light text-gray-300 mt-1">Classroom</p>
+              </div>
+            </div>
           ) : (
-            // No thumbnail available
+            // No thumbnail available for recorded stream
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
               <div className="text-center">
                 <Play className="w-12 h-12 text-muted-foreground mx-auto mb-2" />

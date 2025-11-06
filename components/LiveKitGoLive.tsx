@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { LiveKitRoom, useTrackToggle, RoomAudioRenderer, useTracks, useLocalParticipant } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { scheduleAutomaticThumbnailCapture } from "@/lib/thumbnail";
+import { supabase } from "@/lib/supabase";
 
 // Utility to fetch a LiveKit token from your backend
 async function fetchLiveKitToken(room: string, name: string): Promise<string> {
