@@ -291,13 +291,24 @@ export default function StreamPage({
     stream.playback_url.includes('youtu.be')
   )
   
+  // Debug logging
+  console.log('Stream playback check:', {
+    streamId: stream.id,
+    title: stream.title,
+    is_live: stream.is_live,
+    playback_url: stream.playback_url,
+    hasValidRecording,
+    isOwner
+  })
+  
   // Show recorded video player if stream is not live AND has a valid playback URL
+  // PRIORITY: If there's a recording, ALWAYS show the player (even for owners)
   const isRecordedStream = !stream.is_live && hasValidRecording
   
-  // Show Go Live interface if:
+  // Show Go Live interface ONLY if:
   // 1. It's the demo-live page (stream.isGoLivePage), OR
-  // 2. User owns the stream AND it's NOT a finished recording
-  const isGoLivePage = stream.isGoLivePage || (isOwner && !isRecordedStream)
+  // 2. User owns the stream AND it's NOT a finished recording AND stream hasn't ended yet
+  const isGoLivePage = stream.isGoLivePage || (isOwner && !hasValidRecording && !stream.ended_at)
 
   return (
     <main className="min-h-screen bg-gray-950">
