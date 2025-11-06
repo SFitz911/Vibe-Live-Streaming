@@ -93,13 +93,41 @@ export default function UserLevelBadge({
   )
 }
 
-// Helper to calculate user stats from streams
-export function calculateUserLevel(streams: any[]): { level: number; totalPoints: number } {
+// Helper to calculate user stats from streams, projects, and likes
+export function calculateUserLevel(
+  streams: any[], 
+  projectsCompleted: number = 0,
+  totalLikesReceived: number = 0
+): { 
+  level: number; 
+  totalPoints: number;
+  breakdown: {
+    streamPoints: number;
+    viewPoints: number;
+    projectPoints: number;
+    likePoints: number;
+  }
+} {
   const totalViews = streams.reduce((sum, s) => sum + (s.viewer_count || 0), 0)
   const totalStreams = streams.length
-  const totalPoints = totalViews + (totalStreams * 10)
+  
+  const streamPoints = totalStreams * 10       // 10 points per stream
+  const viewPoints = totalViews                // 1 point per view
+  const projectPoints = projectsCompleted * 20 // 20 points per project
+  const likePoints = totalLikesReceived        // 1 point per like
+  
+  const totalPoints = streamPoints + viewPoints + projectPoints + likePoints
   const level = Math.min(Math.floor(totalPoints / 100) + 1, 9)
   
-  return { level, totalPoints }
+  return { 
+    level, 
+    totalPoints,
+    breakdown: {
+      streamPoints,
+      viewPoints,
+      projectPoints,
+      likePoints
+    }
+  }
 }
 

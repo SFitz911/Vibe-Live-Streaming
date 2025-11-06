@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import { supabase, Stream } from '@/lib/supabase'
-import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube } from 'lucide-react'
+import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube, Award, ThumbsUp } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import UserLevelBadge, { calculateUserLevel } from '@/components/UserLevelBadge'
@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [streams, setStreams] = useState<Stream[]>([])
   const [activeStream, setActiveStream] = useState<any>(null)
+  const [projectsCompleted, setProjectsCompleted] = useState(0)
+  const [totalLikesReceived, setTotalLikesReceived] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function DashboardPage() {
 
       setUser(session.user)
       await fetchStreams(session.user.id)
+      await fetchProjectsAndLikes(session.user.id)
       
       // Check for active live stream
       const { data: liveStream } = await supabase
@@ -47,6 +50,30 @@ export default function DashboardPage() {
 
     checkUser()
   }, [router])
+
+  const fetchProjectsAndLikes = async (userId: string) => {
+    // Fetch projects completed
+    const { count: projectCount } = await supabase
+      .from('user_project_completions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+    setProjectsCompleted(projectCount || 0)
+
+    // Fetch total likes across all user's streams
+    const { data: userStreams } = await supabase
+      .from('streams')
+      .select('id')
+      .eq('user_id', userId)
+
+    if (userStreams && userStreams.length > 0) {
+      const streamIds = userStreams.map(s => s.id)
+      const { count: likeCount } = await supabase
+        .from('stream_likes')
+        .select('*', { count: 'exact', head: true })
+        .in('stream_id', streamIds)
+      setTotalLikesReceived(likeCount || 0)
+    }
+  }
 
   const fetchStreams = async (userId: string) => {
     const { data, error } = await supabase
@@ -125,7 +152,7 @@ export default function DashboardPage() {
 
   const liveStream = streams.find(s => s.is_live)
   const totalViews = streams.reduce((acc, s) => acc + s.viewer_count, 0)
-  const { level, totalPoints } = calculateUserLevel(streams)
+  const { level, totalPoints, breakdown } = calculateUserLevel(streams, projectsCompleted, totalLikesReceived)
 
   return (
     <main className="min-h-screen bg-gray-950">
@@ -166,23 +193,14 @@ export default function DashboardPage() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-gray-400 text-sm font-medium">Total Streams</h3>
               <Video className="h-5 w-5 text-primary-500" />
             </div>
             <p className="text-3xl font-bold text-white">{streams.length}</p>
-          </div>
-
-          <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-400 text-sm font-medium">Live Now</h3>
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            </div>
-            <p className="text-3xl font-bold text-white">
-              {liveStream ? '1' : '0'}
-            </p>
+            <p className="text-xs text-gray-500 mt-1">+{breakdown.streamPoints} XP</p>
           </div>
 
           <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
@@ -192,6 +210,35 @@ export default function DashboardPage() {
             </div>
             <p className="text-3xl font-bold text-white">
               {formatViewerCount(totalViews)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">+{breakdown.viewPoints} XP</p>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400 text-sm font-medium">Nextwork Projects</h3>
+              <Award className="h-5 w-5 text-yellow-500" />
+            </div>
+            <p className="text-3xl font-bold text-white">{projectsCompleted}</p>
+            <p className="text-xs text-gray-500 mt-1">+{breakdown.projectPoints} XP</p>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400 text-sm font-medium">Total Likes</h3>
+              <ThumbsUp className="h-5 w-5 text-pink-500" />
+            </div>
+            <p className="text-3xl font-bold text-white">{totalLikesReceived}</p>
+            <p className="text-xs text-gray-500 mt-1">+{breakdown.likePoints} XP</p>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400 text-sm font-medium">Live Now</h3>
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            </div>
+            <p className="text-3xl font-bold text-white">
+              {liveStream ? '1' : '0'}
             </p>
           </div>
 

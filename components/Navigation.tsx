@@ -53,10 +53,13 @@ export default function Navigation() {
     await supabase.auth.signOut()
   }
 
+  const isNextworkAdmin = user?.email?.endsWith('@nextwork.org')
+
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/discover', label: 'Discover', icon: Compass },
     { href: '/dashboard', label: 'Dashboard', icon: Radio },
+    ...(isNextworkAdmin ? [{ href: '/dashboard/admin', label: '🎓 Admin', icon: Settings }] : []),
     { href: '/dashboard/stream/setup', label: 'Help & Troubleshooting', icon: Settings },
   ]
 
@@ -117,7 +120,13 @@ export default function Navigation() {
                       <p className="text-sm font-medium text-foreground">
                         {user.email?.split('@')[0] || 'User'}
                       </p>
-                      <p className="text-xs text-muted-foreground">Streamer</p>
+                      {user.email?.endsWith('@nextwork.org') ? (
+                        <p className="text-xs text-yellow-400 font-semibold flex items-center">
+                          🎓 Nextwork.org Staff
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">Streamer</p>
+                      )}
                     </div>
                     <UserLevelBadge totalPoints={userLevel.totalPoints} size="small" />
                   </div>

@@ -6,7 +6,9 @@ import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Clock, Play, User, Verified } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth'
 import UserLevelBadge, { calculateUserLevel } from './UserLevelBadge'
+import LikeButton from './LikeButton'
 
 interface StreamCardProps {
   stream: Stream & {
@@ -15,7 +17,9 @@ interface StreamCardProps {
 }
 
 export default function StreamCard({ stream }: StreamCardProps) {
+  const { user } = useAuth()
   const [streamerLevel, setStreamerLevel] = useState({ level: 1, totalPoints: 0 })
+  const [likeCount, setLikeCount] = useState(0)
 
   useEffect(() => {
     // Fetch streamer's total stats to calculate level
@@ -34,6 +38,20 @@ export default function StreamCard({ stream }: StreamCardProps) {
 
     fetchStreamerLevel()
   }, [stream.user_id])
+
+  useEffect(() => {
+    // Fetch initial like count
+    const fetchLikeCount = async () => {
+      const { count } = await supabase
+        .from('stream_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('stream_id', stream.id)
+
+      setLikeCount(count || 0)
+    }
+
+    fetchLikeCount()
+  }, [stream.id])
 
   return (
     <Link href={`/stream/${stream.id}`} className="group">
@@ -112,6 +130,16 @@ export default function StreamCard({ stream }: StreamCardProps) {
                 <Play className="w-8 h-8 text-white ml-1" />
               </div>
             </div>
+          </div>
+
+          {/* Like Button - Bottom Right Corner */}
+          <div className="absolute bottom-0 right-0 z-20" onClick={(e) => e.preventDefault()}>
+            <LikeButton 
+              streamId={stream.id} 
+              userId={user?.id}
+              initialLikeCount={likeCount}
+              showInCorner={true}
+            />
           </div>
         </div>
         
