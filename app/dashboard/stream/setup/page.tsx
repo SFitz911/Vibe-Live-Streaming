@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import { AlertCircle, Camera, Wifi, Volume2, Video, CheckCircle, XCircle, HelpCircle, RefreshCw, Settings, Chrome, Globe } from 'lucide-react'
 import Link from 'next/link'
 
@@ -17,6 +18,10 @@ export default function TroubleshootingPage() {
       <Navigation />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+        
         {/* Header */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/20 rounded-full mb-4">

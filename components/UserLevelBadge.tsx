@@ -38,9 +38,12 @@ export default function UserLevelBadge({
 
   if (size === 'small') {
     return (
-      <div className={`inline-flex items-center bg-gradient-to-r ${levelColors[level]} px-3 py-1 rounded-full`}>
-        <Star className="fill-current text-yellow-300 mr-1" size={14} />
-        <span className="text-white text-xs font-bold">LVL {level}</span>
+      <div className="inline-flex flex-col items-center justify-center bg-gray-800/70 border border-gray-700 px-2 py-1 rounded-md min-w-[48px]">
+        <div className="flex items-center leading-none">
+          <Star className="fill-current text-yellow-400" size={9} />
+          <span className="text-gray-400 text-[8px] font-medium uppercase tracking-wide ml-0.5">Lvl</span>
+        </div>
+        <span className="text-white text-lg font-light leading-tight mt-0.5">{level}</span>
       </div>
     )
   }

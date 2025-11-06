@@ -1,5 +1,6 @@
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import { Search, Radio } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -99,6 +100,10 @@ export default async function DiscoverPage({
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton href="/" label="Back to Home" />
+        </div>
+        
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <Radio className="h-8 w-8 text-red-500 animate-pulse" />

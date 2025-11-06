@@ -53,13 +53,10 @@ export default function Navigation() {
     await supabase.auth.signOut()
   }
 
-  const isNextworkAdmin = user?.email?.endsWith('@nextwork.org')
-
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/discover', label: 'Discover', icon: Compass },
     { href: '/dashboard', label: 'Dashboard', icon: Radio },
-    ...(isNextworkAdmin ? [{ href: '/dashboard/admin', label: '🎓 Admin', icon: Settings }] : []),
     { href: '/dashboard/stream/setup', label: 'Help & Troubleshooting', icon: Settings },
   ]
 
@@ -72,9 +69,14 @@ export default function Navigation() {
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
               <Radio className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold gradient-text">
-              Vibe Coding Live
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xs font-light text-white/80 tracking-wide">
+                Nextwork.org
+              </span>
+              <span className="text-2xl font-bold gradient-text leading-tight">
+                Vibe Coding Live
+              </span>
+            </div>
           </Link>
 
           {/* Navigation Links */}
@@ -121,8 +123,8 @@ export default function Navigation() {
                         {user.email?.split('@')[0] || 'User'}
                       </p>
                       {user.email?.endsWith('@nextwork.org') ? (
-                        <p className="text-xs text-yellow-400 font-semibold flex items-center">
-                          🎓 Nextwork.org Staff
+                        <p className="text-xs text-yellow-400 font-semibold">
+                          Staff-Expert
                         </p>
                       ) : (
                         <p className="text-xs text-muted-foreground">Streamer</p>

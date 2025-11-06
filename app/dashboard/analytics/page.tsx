@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { 
@@ -126,6 +127,10 @@ export default function AnalyticsPage() {
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton href="/dashboard" label="Back to Dashboard" />
+        </div>
+        
         {/* Header with Level Badge */}
         <div className="mb-8 flex items-center justify-between">
           <div>

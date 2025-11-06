@@ -118,19 +118,19 @@ WHERE id IN (
 -- ========================================
 -- SEED: Insert Nextwork Projects
 -- ========================================
-INSERT INTO public.nextwork_projects (id, title, description, difficulty, category, xp_reward)
+INSERT INTO public.nextwork_projects (title, description, difficulty, category, xp_reward)
 VALUES
-    ('proj-0001', 'Build a Chatbot with Amazon Lex', 'Create an intelligent chatbot using AWS Lex service', 'Intermediate', 'AWS Cloud', 20),
-    ('proj-0002', 'Deploy with Kubernetes & EKS', 'Learn container orchestration and AWS EKS deployment', 'Advanced', 'DevOps', 20),
-    ('proj-0003', 'Database Design with Supabase & Cursor', 'Build a complete database with Supabase and Cursor AI', 'Beginner', 'Database', 20),
-    ('proj-0004', 'AWS CodeArtifact for Dependencies', 'Set up package management with AWS CodeArtifact', 'Intermediate', 'AWS Cloud', 20),
-    ('proj-0005', 'Build Web Features with Claude Code', 'Use Claude AI to build web application features', 'Intermediate', 'AI & Machine Learning', 20),
-    ('proj-0006', 'Supabase MCP + Cursor Integration', 'Integrate Supabase with Cursor AI using MCP', 'Advanced', 'AI & Machine Learning', 20),
-    ('proj-0007', 'AWS Lex Multi-Slot Conversations', 'Build complex chatbot conversations with multiple slots', 'Intermediate', 'AWS Cloud', 20),
-    ('proj-0008', 'Connect AWS Lex with Lambda Functions', 'Integrate Lex chatbot with AWS Lambda backend', 'Advanced', 'AWS Cloud', 20),
-    ('proj-0009', 'Save User Info in Lex Chatbot', 'Implement user data persistence in AWS Lex', 'Intermediate', 'AWS Cloud', 20),
-    ('proj-0010', 'Next.js Full-Stack Application', 'Build a complete Next.js application from scratch', 'Intermediate', 'Web Development', 20)
-ON CONFLICT (id) DO NOTHING;
+    ('Build a Chatbot with Amazon Lex', 'Create an intelligent chatbot using AWS Lex service', 'Intermediate', 'AWS Cloud', 20),
+    ('Deploy with Kubernetes & EKS', 'Learn container orchestration and AWS EKS deployment', 'Advanced', 'DevOps', 20),
+    ('Database Design with Supabase & Cursor', 'Build a complete database with Supabase and Cursor AI', 'Beginner', 'Database', 20),
+    ('AWS CodeArtifact for Dependencies', 'Set up package management with AWS CodeArtifact', 'Intermediate', 'AWS Cloud', 20),
+    ('Build Web Features with Claude Code', 'Use Claude AI to build web application features', 'Intermediate', 'AI & Machine Learning', 20),
+    ('Supabase MCP + Cursor Integration', 'Integrate Supabase with Cursor AI using MCP', 'Advanced', 'AI & Machine Learning', 20),
+    ('AWS Lex Multi-Slot Conversations', 'Build complex chatbot conversations with multiple slots', 'Intermediate', 'AWS Cloud', 20),
+    ('Connect AWS Lex with Lambda Functions', 'Integrate Lex chatbot with AWS Lambda backend', 'Advanced', 'AWS Cloud', 20),
+    ('Save User Info in Lex Chatbot', 'Implement user data persistence in AWS Lex', 'Intermediate', 'AWS Cloud', 20),
+    ('Next.js Full-Stack Application', 'Build a complete Next.js application from scratch', 'Intermediate', 'Web Development', 20)
+ON CONFLICT DO NOTHING;
 
 -- ========================================
 -- INDEXES for Performance

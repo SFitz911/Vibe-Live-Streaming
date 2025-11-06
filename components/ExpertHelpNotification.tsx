@@ -195,11 +195,15 @@ export default function ExpertHelpNotification({
 
   return (
     <div className="fixed top-6 right-6 z-50 animate-slideInDown">
-      <div className={`bg-gradient-to-r ${urgencyColors[notification.request.urgency]} rounded-lg shadow-2xl p-5 max-w-md border-2`}>
+      {/* Semi-transparent card with subtle blur for readability */}
+      <div className={`bg-gray-900/80 backdrop-blur-md rounded-lg shadow-2xl p-5 max-w-md border border-gray-700`}>
+        {/* Urgency bar */}
+        <div className={`h-1 w-full rounded-sm mb-4 bg-gradient-to-r ${urgencyColors[notification.request.urgency]}`} />
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center animate-pulse">
-              <AlertCircle className="h-7 w-7 text-red-600" />
+            {/* Softer icon badge for better contrast */}
+            <div className="w-12 h-12 bg-green-200 text-green-800 rounded-full flex items-center justify-center animate-pulse">
+              <AlertCircle className="h-7 w-7" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -218,7 +222,7 @@ export default function ExpertHelpNotification({
                 <div className="flex space-x-2">
                   <button
                     onClick={handleRespond}
-                    className="bg-white text-gray-900 px-4 py-2 rounded-md text-sm font-bold hover:bg-gray-100 transition-colors flex items-center space-x-1"
+                    className="bg-green-500/90 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-green-600 transition-colors flex items-center space-x-1"
                   >
                     <MessageSquare className="h-4 w-4" />
                     <span>Respond</span>
@@ -228,7 +232,7 @@ export default function ExpertHelpNotification({
                       const email = `mailto:${notification.request.requesterName}@example.com?subject=Re: ${notification.request.topic}`
                       window.open(email, '_blank')
                     }}
-                    className="bg-white/20 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-white/30 transition-colors flex items-center space-x-1"
+                    className="bg-gray-700/70 text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-gray-700 transition-colors flex items-center space-x-1"
                   >
                     <Mail className="h-4 w-4" />
                     <span>Email</span>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import { useAuth } from '@/lib/auth'
 import { Youtube, Link as LinkIcon, CheckCircle } from 'lucide-react'
 
@@ -66,6 +67,10 @@ export default function ImportYouTubePage() {
       <Navigation />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton href="/dashboard" label="Back to Dashboard" />
+        </div>
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
             <Youtube className="text-red-500 mr-3" size={36} />

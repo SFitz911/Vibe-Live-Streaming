@@ -89,10 +89,10 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
       })
     }
 
-    // Auto-hide after 10 seconds
+    // Auto-hide after 15 seconds
     setTimeout(() => {
       setNotification(null)
-    }, 10000)
+    }, 15000)
   }
 
   const playNotificationSound = () => {
@@ -158,7 +158,7 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
                 <p className="text-white font-semibold mb-2">{notification.streamTitle}</p>
                 <button
                   onClick={handleViewStream}
-                  className="bg-white text-primary-600 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-gray-100 transition-colors"
+                  className="bg-green-400 text-gray-900 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-500 transition-colors shadow-md"
                 >
                   Watch Now
                 </button>

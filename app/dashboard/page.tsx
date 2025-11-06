@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import { supabase, Stream } from '@/lib/supabase'
-import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube, Award, ThumbsUp } from 'lucide-react'
+import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube, Award, ThumbsUp, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import UserLevelBadge, { calculateUserLevel } from '@/components/UserLevelBadge'
@@ -153,6 +153,7 @@ export default function DashboardPage() {
   const liveStream = streams.find(s => s.is_live)
   const totalViews = streams.reduce((acc, s) => acc + s.viewer_count, 0)
   const { level, totalPoints, breakdown } = calculateUserLevel(streams, projectsCompleted, totalLikesReceived)
+  const isNextworkAdmin = user?.email?.endsWith('@nextwork.org')
 
   return (
     <main className="min-h-screen bg-gray-950">
@@ -168,7 +169,18 @@ export default function DashboardPage() {
               Manage your streams and engage with your audience
             </p>
           </div>
-          <UserLevelBadge totalPoints={totalPoints} size="medium" />
+          <div className="flex items-center space-x-4">
+            {isNextworkAdmin && (
+              <Link
+                href="/dashboard/admin"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 shadow-lg"
+              >
+                <Shield className="h-5 w-5" />
+                <span>Admin Dashboard</span>
+              </Link>
+            )}
+            <UserLevelBadge totalPoints={totalPoints} size="medium" />
+          </div>
         </div>
 
         {/* Active Stream Alert */}
