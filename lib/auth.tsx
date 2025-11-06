@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    // End all active streams before signing out
+    // End all active streams before signing out (but don't block sign out if it fails)
     if (user) {
       try {
         const { data: activeStreams } = await supabase
@@ -152,20 +152,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('is_live', true)
         
         if (activeStreams && activeStreams.length > 0) {
-          // End each active stream
-          for (const stream of activeStreams) {
-            await fetch('/api/streams/livekit-end', {
+          // End each active stream (fire and forget)
+          activeStreams.forEach(stream => {
+            fetch('/api/streams/livekit-end', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ streamId: stream.id }),
-            })
-          }
+            }).catch(() => {})
+          })
         }
       } catch (error) {
-        console.error('Error ending streams on sign out:', error)
+        // Silently fail - don't block sign out
+        console.log('Stream cleanup skipped:', error)
       }
     }
     
+    // Always sign out, even if stream cleanup fails
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)

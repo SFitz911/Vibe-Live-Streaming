@@ -269,7 +269,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/dashboard/stream/new"
-              className="bg-primary-600 hover:bg-primary-700 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
+              className="bg-green-500/20 hover:bg-green-500/30 border-2 border-green-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
             >
               <Plus className="h-6 w-6" />
               <span className="font-semibold">Create New Stream</span>

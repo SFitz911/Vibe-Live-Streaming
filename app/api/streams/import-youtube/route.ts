@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Extract YouTube video ID from URL
+// Extract YouTube video ID from URL (supports regular videos, Shorts, and live streams)
 function getYouTubeVideoId(url: string): string | null {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/,
     /youtube\.com\/live\/([^&\?\/]+)/,
+    /youtube\.com\/shorts\/([^&\?\/]+)/,  // YouTube Shorts support
   ]
   
   for (const pattern of patterns) {
