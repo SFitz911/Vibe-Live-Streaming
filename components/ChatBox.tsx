@@ -82,6 +82,11 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   // Temporarily disabled for deployment
   // useEffect(() => {
   //   // Fetch initial messages
@@ -195,11 +200,11 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 rounded-lg">
-      <div className="p-4 border-b border-gray-800">
+    <div className="flex flex-col bg-gray-900 rounded-lg h-[calc(100vh-180px)] max-h-[700px]">
+      <div className="p-4 border-b border-gray-800 flex-shrink-0">
         <TestExpertNotificationButton />
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {messages.map((message) => (
           <div key={message.id} className="flex items-start space-x-2">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
@@ -230,7 +235,7 @@ export default function ChatBox({ streamId, userId }: ChatBoxProps) {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800">
+      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-800 flex-shrink-0">
         <div className="flex items-center space-x-2">
           <input
             type="text"

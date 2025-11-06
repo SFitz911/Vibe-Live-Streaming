@@ -127,7 +127,7 @@ export default function Navigation() {
                           Staff-Expert
                         </p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Streamer</p>
+                        <p className="text-xs text-muted-foreground">Learner</p>
                       )}
                     </div>
                     <UserLevelBadge totalPoints={userLevel.totalPoints} size="small" />
