@@ -7,10 +7,11 @@ A **complete, production-ready livestreaming platform** inspired by Livekit, bui
 ### Key Highlights
 - ✅ **Full-stack application** with Next.js 14 + TypeScript
 - ✅ **Real-time features** with Supabase Realtime (chat, viewer counts)
-- ✅ **AWS integration** for professional live streaming
+- ✅ **LiveKit Cloud integration** for professional live streaming (WebRTC)
 - ✅ **Modern, beautiful UI** with Tailwind CSS
 - ✅ **Production-ready** with security, RLS, and deployment guides
 - ✅ **Scalable architecture** ready for growth
+- 💰 **Cost-effective** - No AWS required! Uses free/low-cost services
 
 ## 📁 Project Structure
 
@@ -48,7 +49,8 @@ Vibe_Code_AI_V5/
 │
 ├── lib/                         # Utility libraries
 │   ├── supabase.ts             # Supabase client + types
-│   ├── aws-config.ts           # AWS SDK configuration
+│   ├── auth.tsx                # Authentication context
+│   ├── thumbnail.ts            # Auto-thumbnail capture
 │   └── utils.ts                # Helper functions
 │
 ├── types/                       # TypeScript definitions
@@ -66,7 +68,8 @@ Vibe_Code_AI_V5/
 └── Documentation
     ├── README.md              # Main documentation
     ├── QUICKSTART.md          # 5-minute setup guide
-    ├── AWS_SETUP.md           # Detailed AWS setup
+    ├── LIVEKIT_SETUP.md       # LiveKit Cloud setup
+    ├── SETUP_EXPERT_NOTIFICATIONS.md  # Email/SMS notifications
     ├── DEPLOYMENT.md          # Deployment options
     └── PROJECT_SUMMARY.md     # This file
 \`\`\`
@@ -162,7 +165,7 @@ Vibe_Code_AI_V5/
 
 1. **Navigation** - Responsive navbar with auth state
 2. **StreamCard** - Beautiful stream preview cards
-3. **VideoPlayer** - HLS video playback (AWS IVS ready)
+3. **VideoPlayer** - Universal video playback (YouTube, Direct files, HLS)
 4. **ChatBox** - Real-time chat with Supabase Realtime
 
 ### UI/UX Features
@@ -190,44 +193,70 @@ Vibe_Code_AI_V5/
   - Spam prevention ready
 
 #### Media Upload
-- `POST /api/upload/thumbnail` - Upload thumbnails to S3
-  - AWS S3 integration
-  - CloudFront CDN ready
+- `POST /api/streams/upload-recording` - Upload recorded streams
+  - Supabase Storage integration
+  - Automatic file management
+  - 5GB project limit with auto-cleanup
 
 ### API Features
 - ✅ TypeScript type safety
 - ✅ Error handling
 - ✅ Input validation
 - ✅ Supabase integration
-- ✅ AWS SDK integration
+- ✅ LiveKit SDK integration
+- ✅ Expert notification API (Email + SMS)
 
-## ☁️ AWS Integration
+## ☁️ Live Streaming Solution - LiveKit Cloud
 
-### Services Configured
+### Why Not AWS?
 
-1. **AWS IVS** (Interactive Video Service)
-   - Low-latency live streaming
-   - HLS output
-   - Stream key management
-   - Status tracking
+**AWS was initially considered** but not implemented due to:
+- 💰 **High startup costs** - AWS IVS, S3, and CloudFront require significant monthly fees
+- 🔧 **Complex setup** - Multiple services to configure and manage
+- 📊 **Unpredictable billing** - Harder to estimate costs for new projects
+- 🎓 **Learning curve** - More infrastructure knowledge required
 
-2. **AWS S3**
-   - Thumbnail storage
+### What We're Using Instead: LiveKit Cloud ✅
+
+**LiveKit Cloud** provides professional-grade live streaming at a fraction of the cost:
+
+1. **LiveKit Cloud** (Real-time Video/Audio)
+   - WebRTC-based streaming (better than HLS!)
+   - Ultra-low latency (<200ms vs 5-15s for HLS)
+   - Built-in screen sharing, camera, mic
+   - Auto-scaling infrastructure
+   - **FREE tier: 10,000 minutes/month**
+   - Production: ~$0.005/participant-minute
+
+2. **Supabase Storage** (File Storage)
+   - Recorded video storage (.webm files)
+   - Thumbnail storage (images + animated clips)
    - Avatar storage
-   - Recording storage (ready)
-   - Public read access
+   - **FREE tier: 1GB storage**
+   - Production: ~$0.021/GB/month
 
-3. **AWS CloudFront**
-   - Global CDN
-   - Fast asset delivery
-   - HTTPS support
-   - Cache optimization
+3. **Supabase Database** (Metadata)
+   - Stream information
+   - User profiles
+   - Chat messages
+   - Analytics
+   - **FREE tier: 500MB database**
+
+### Cost Comparison
+
+| Service | AWS Stack | LiveKit Stack | Savings |
+|---------|-----------|---------------|---------|
+| Streaming | AWS IVS: ~$1.00/hr | LiveKit: ~$0.30/hr | 70% cheaper |
+| Storage | S3 + CloudFront: ~$50/mo | Supabase: $0-$25/mo | 50-100% cheaper |
+| Setup | Complex | Simple | Hours saved |
+| **Total/month** | **~$300+** | **$0-$50** | **~$250 saved** |
 
 ### Setup Status
-- ⚙️ Code ready for AWS services
-- 📝 Detailed setup guide in AWS_SETUP.md
-- 🔌 Easy environment variable configuration
-- 🎥 OBS streaming guide included
+- ✅ LiveKit Cloud fully integrated
+- ✅ Production-ready configuration
+- 📝 Setup guide in LIVEKIT_SETUP.md
+- 🎥 Browser-based streaming (no OBS needed!)
+- 💰 Cost-effective for startups
 
 ## 🛡️ Security Implemented
 
@@ -258,20 +287,26 @@ Vibe_Code_AI_V5/
 ## 📊 Features Overview
 
 ### ✅ Implemented
-- User authentication (sign up, sign in, sign out)
-- User profiles with avatars
-- Create streams
-- Live streaming (AWS IVS integration)
+- User authentication (simplified email + password signup)
+- User profiles with auto-generated usernames
+- Create streams with detailed setup form
+- **Live streaming with LiveKit Cloud** (WebRTC, ultra-low latency)
 - Real-time chat with Supabase Realtime
 - Stream discovery and browsing
 - Category filtering
 - Stream tags
 - Viewer counting
-- Creator dashboard
-- Stream analytics (basic)
+- Creator dashboard with level system (1-9)
+- Stream analytics with data visualization
+- **Video recording** (automatic during live streams)
+- **Recorded video playback** (YouTube + Supabase .webm files)
+- **Auto-thumbnail capture** (3-second animated clips)
+- **Expert notifications** (Email + SMS to Nextwork.org staff)
+- **Active stream alerts** (prevents multiple simultaneous streams)
+- **Auto-end streams** (on logout/browser close)
+- Back button navigation
 - Follow system (database ready)
 - Moderator system (database ready)
-- Thumbnail uploads
 - Responsive design
 - Dark theme UI
 
@@ -314,21 +349,20 @@ Vibe_Code_AI_V5/
    - Troubleshooting
    - Quick checklist
 
-3. **AWS_SETUP.md** (Detailed AWS guide)
-   - Step-by-step AWS IVS setup
-   - S3 configuration
-   - CloudFront setup
-   - IAM user creation
-   - OBS configuration
-   - Cost estimation
+3. **LIVEKIT_SETUP.md** (LiveKit Cloud guide)
+   - Step-by-step LiveKit Cloud setup
+   - Free tier details
+   - Browser-based streaming
+   - WebRTC configuration
+   - Cost-effective alternative to AWS
 
 4. **DEPLOYMENT.md** (Production deployment)
-   - Vercel deployment
+   - Render.com deployment (recommended & active)
    - Docker deployment
-   - AWS EC2 deployment
    - Self-hosted options
-   - CI/CD setup
+   - CI/CD with GitHub auto-deploy
    - Security checklist
+   - Environment variable management
    - Monitoring
 
 5. **PROJECT_SUMMARY.md** (This file)
@@ -338,16 +372,24 @@ Vibe_Code_AI_V5/
 
 ## 🚀 Deployment Options
 
-### Easy (5 minutes)
-- ✅ Vercel (recommended)
+### Easy & Recommended (5 minutes) ⭐
+- ✅ **Render.com** (CURRENTLY ACTIVE)
+  - Free tier available
+  - Auto-deploy from GitHub
+  - Docker support
+  - Live at: https://vibe-live-streaming.onrender.com/
+
+### Alternative Options
+
+#### Easy (5-10 minutes)
+- ✅ Vercel
 - ✅ Netlify
 
-### Intermediate (30 minutes)
-- ✅ Docker + Docker Compose
+#### Intermediate (30 minutes)
+- ✅ Docker + Docker Compose (local development)
 - ✅ DigitalOcean/Linode droplet
 
-### Advanced (1-2 hours)
-- ✅ AWS EC2 + Load Balancer
+#### Advanced (1-2 hours)
 - ✅ Kubernetes
 - ✅ Custom infrastructure
 
@@ -358,9 +400,11 @@ All options documented in DEPLOYMENT.md
 ### Main Dependencies
 - `next@14.2.0` - React framework
 - `react@18.3.0` - UI library
-- `@supabase/supabase-js` - Supabase client
-- `@aws-sdk/client-s3` - AWS S3
-- `@aws-sdk/client-ivs` - AWS IVS
+- `@supabase/supabase-js` - Database & Auth
+- `@livekit/components-react` - LiveKit React components
+- `livekit-client` - LiveKit client SDK
+- `livekit-server-sdk` - LiveKit server SDK
+- `hls.js` - HLS video playback
 - `tailwindcss` - CSS framework
 - `typescript` - Type safety
 - `lucide-react` - Icons
@@ -368,8 +412,11 @@ All options documented in DEPLOYMENT.md
 ### Development Dependencies
 - `eslint` - Code linting
 - `@types/*` - TypeScript types
+- `concurrently` - Run multiple commands
 
-Total: ~20 core dependencies (lean and modern)
+**Note:** AWS SDK packages are in package.json but not actively used. They can be removed to reduce bundle size.
+
+Total: ~25 core dependencies (lean and modern)
 
 ## 🎯 Use Cases
 
@@ -404,9 +451,10 @@ Total: ~20 core dependencies (lean and modern)
 
 ### vs Owncast
 - ✅ Modern tech stack (Next.js vs Go)
-- ✅ Cloud-native (Supabase + AWS)
+- ✅ Cloud-native (Supabase + LiveKit Cloud)
 - ✅ Easier to customize
 - ✅ Better developer experience
+- ✅ Lower cost (free tier available)
 - ✅ Horizontal scaling ready
 
 ### vs Twitch/YouTube
@@ -426,16 +474,19 @@ Total: ~20 core dependencies (lean and modern)
 ## 🎓 Learning Outcomes
 
 By exploring this project, you'll learn:
-- Next.js App Router
-- Supabase integration
-- Real-time features
-- AWS services (IVS, S3, CloudFront)
+- Next.js App Router (App Directory)
+- Supabase integration (Database, Auth, Storage, Realtime)
+- LiveKit Cloud (WebRTC live streaming)
+- Real-time features (chat, viewer counts)
 - TypeScript best practices
-- Modern React patterns
-- Authentication & authorization
-- API design
-- Docker containerization
-- Production deployment
+- Modern React patterns (hooks, context, client/server components)
+- Authentication & authorization (Row Level Security)
+- API design (REST endpoints)
+- Docker containerization (local development)
+- Production deployment (Render.com, GitHub CI/CD)
+- Expert notification systems (Email + SMS via Resend + Twilio)
+- Video recording and playback
+- Gamification (user levels, XP points)
 
 ## 📈 Scaling Considerations
 
@@ -467,23 +518,30 @@ All documented in DEPLOYMENT.md
 
 1. **Complete solution** - Not just a starter, it's feature-complete
 2. **Modern stack** - Latest Next.js, TypeScript, Tailwind
-3. **Real-time everything** - Chat, viewers, notifications
+3. **Real-time everything** - Chat, viewers, notifications, live streaming
 4. **Production-ready** - Security, scaling, deployment covered
-5. **Well-documented** - 5 comprehensive guides
-6. **AWS integration** - Professional streaming quality
-7. **Beautiful UI** - Modern, responsive, polished
-8. **Open for extension** - Easy to customize and add features
+5. **Well-documented** - Multiple comprehensive guides
+6. **LiveKit Cloud integration** - Professional WebRTC streaming quality
+7. **Cost-effective** - Free tier available, ~$250/mo cheaper than AWS
+8. **Beautiful UI** - Modern, responsive, polished
+9. **Expert notifications** - Email + SMS alerts for support
+10. **Gamification** - User levels, XP points, badges
+11. **Auto-thumbnails** - Animated 3-second preview clips
+12. **Open for extension** - Easy to customize and add features
 
 ## 🙏 Final Notes
 
 This is a **complete, production-ready livestreaming platform** that you can:
-- Deploy to your website immediately
+- Deploy to your website immediately (currently live on Render.com!)
 - Customize to your brand
 - Scale as you grow
 - Own completely (self-hosted)
 - Learn from (well-structured code)
+- Run on a budget (starts at $0/month with free tiers!)
 
-**Everything you need is included.** Just add your AWS credentials and you're ready to go live! 🎥
+**Everything you need is included.** Just add your Supabase and LiveKit Cloud credentials (both have free tiers) and you're ready to go live! 🎥
+
+**Cost-conscious decision:** AWS was evaluated but replaced with LiveKit Cloud + Supabase to minimize startup costs while maintaining professional quality. This saves ~$250/month compared to AWS IVS + S3 + CloudFront stack.
 
 ---
 
