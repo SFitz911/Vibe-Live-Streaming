@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import { supabase } from '@/lib/supabase'
 import { Video, Image as ImageIcon, Tag } from 'lucide-react'
 
@@ -22,6 +23,7 @@ const CATEGORIES = [
 export default function NewStreamPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [activeStream, setActiveStream] = useState<any>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
@@ -40,6 +42,20 @@ export default function NewStreamPage() {
       }
 
       setUser(session.user)
+      
+      // Check if user has an active live stream
+      const { data: liveStream } = await supabase
+        .from('streams')
+        .select('id, title')
+        .eq('user_id', session.user.id)
+        .eq('is_live', true)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (liveStream) {
+        setActiveStream(liveStream)
+      }
     }
 
     checkUser()
@@ -99,6 +115,10 @@ export default function NewStreamPage() {
       <Navigation />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton href="/dashboard" label="Back to Dashboard" />
+        </div>
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">
             Create New Stream
@@ -115,6 +135,25 @@ export default function NewStreamPage() {
             </a>
           </div>
         </div>
+
+        {activeStream && (
+          <div className="mb-6 p-6 rounded-lg bg-green-500/10 border-2 border-green-500 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-green-400 mb-1">
+                🔴 You Have an Active Stream
+              </h3>
+              <p className="text-sm text-gray-300">
+                "{activeStream.title}" is currently live
+              </p>
+            </div>
+            <button
+              onClick={() => router.push(`/stream/${activeStream.id}`)}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Return to Stream
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500">

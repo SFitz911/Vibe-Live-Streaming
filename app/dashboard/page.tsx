@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [streams, setStreams] = useState<Stream[]>([])
+  const [activeStream, setActiveStream] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,6 +27,21 @@ export default function DashboardPage() {
 
       setUser(session.user)
       await fetchStreams(session.user.id)
+      
+      // Check for active live stream
+      const { data: liveStream } = await supabase
+        .from('streams')
+        .select('id, title')
+        .eq('user_id', session.user.id)
+        .eq('is_live', true)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (liveStream) {
+        setActiveStream(liveStream)
+      }
+      
       setLoading(false)
     }
 
@@ -127,6 +143,27 @@ export default function DashboardPage() {
           </div>
           <UserLevelBadge totalPoints={totalPoints} size="medium" />
         </div>
+
+        {/* Active Stream Alert */}
+        {activeStream && (
+          <div className="mb-6 p-6 rounded-lg bg-green-500/10 border-2 border-green-500 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-green-400 mb-1 flex items-center">
+                <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
+                Live Stream Active
+              </h3>
+              <p className="text-sm text-gray-300">
+                "{activeStream.title}" is currently streaming
+              </p>
+            </div>
+            <button
+              onClick={() => router.push(`/stream/${activeStream.id}`)}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Go to Stream
+            </button>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

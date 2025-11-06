@@ -77,6 +77,32 @@ export default function LiveKitGoLive({
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
 
+    // Auto-end stream on browser close or tab close
+    useEffect(() => {
+        const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+            if (streamId) {
+                // Use sendBeacon for reliable cleanup on page unload
+                const data = JSON.stringify({ streamId });
+                navigator.sendBeacon('/api/streams/livekit-end', data);
+            }
+        };
+
+        const handleVisibilityChange = async () => {
+            if (document.hidden && streamId) {
+                // Tab is hidden/browser minimized - warn but don't end
+                console.log('Tab hidden - stream continues');
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [streamId]);
+
     const handleJoin = async () => {
         setError(null);
         try {

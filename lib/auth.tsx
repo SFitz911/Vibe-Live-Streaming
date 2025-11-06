@@ -52,6 +52,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Handle browser close - end all active streams
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (user) {
+        try {
+          const { data: activeStreams } = await supabase
+            .from('streams')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_live', true)
+          
+          if (activeStreams && activeStreams.length > 0) {
+            // Use sendBeacon for reliable cleanup
+            for (const stream of activeStreams) {
+              navigator.sendBeacon('/api/streams/livekit-end', 
+                JSON.stringify({ streamId: stream.id }))
+            }
+          }
+        } catch (error) {
+          console.error('Error ending streams on browser close:', error)
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [user])
+
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -111,6 +142,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    // End all active streams before signing out
+    if (user) {
+      try {
+        const { data: activeStreams } = await supabase
+          .from('streams')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('is_live', true)
+        
+        if (activeStreams && activeStreams.length > 0) {
+          // End each active stream
+          for (const stream of activeStreams) {
+            await fetch('/api/streams/livekit-end', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ streamId: stream.id }),
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error ending streams on sign out:', error)
+      }
+    }
+    
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)

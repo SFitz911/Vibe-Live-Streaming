@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Navigation from '@/components/Navigation'
+import BackButton from '@/components/BackButton'
 import VideoPlayer from '@/components/VideoPlayer'
 import ChatBox from '@/components/ChatBox'
 import StreamManager from '@/components/StreamManager'
 import LiveKitGoLive from '@/components/LiveKitGoLive'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User, ChevronDown, Mail } from 'lucide-react'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
@@ -58,6 +59,7 @@ export default function StreamPage({
 }: {
   params: { id: string }
 }) {
+  const router = useRouter()
   const { user, profile, loading: authLoading } = useAuth()
   const [showExpertDropdown, setShowExpertDropdown] = useState(false)
   const [showStreamForm, setShowStreamForm] = useState(true)
@@ -69,6 +71,31 @@ export default function StreamPage({
   })
   const [stream, setStream] = useState<any>(null)
   const [streamLoading, setStreamLoading] = useState(true)
+  const [activeStream, setActiveStream] = useState<any>(null)
+
+  // Check for active stream when user is authenticated
+  useEffect(() => {
+    const checkActiveStream = async () => {
+      if (!user) return
+      
+      // Check if user has an active live stream (different from current page)
+      const { data: liveStream } = await supabase
+        .from('streams')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .eq('is_live', true)
+        .neq('id', params.id)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (liveStream) {
+        setActiveStream(liveStream)
+      }
+    }
+
+    checkActiveStream()
+  }, [user, params.id])
 
   // Fetch stream data
   useEffect(() => {
@@ -171,12 +198,15 @@ export default function StreamPage({
   }
 
   const handleContactExpert = async (expert: typeof EXPERTS[0]) => {
-    // Trigger expert notification
+    const requesterName = profile?.display_name || user?.email || 'Stream Viewer'
+    const streamUrl = `${window.location.origin}/stream/${params.id}`
+    
+    // Trigger expert notification UI
     const event = new CustomEvent('expertHelpRequest', {
       detail: {
         id: `help-${Date.now()}`,
-        requesterName: 'Stream Viewer',
-        topic: `Assistance needed on stream: ${stream.title}`,
+        requesterName,
+        topic: `Assistance needed on stream: ${stream?.title || 'Live Stream'}`,
         urgency: 'medium',
         timestamp: new Date().toISOString(),
         streamId: params.id,
@@ -184,32 +214,35 @@ export default function StreamPage({
     })
     window.dispatchEvent(event)
 
-    // Send API request to notify expert
+    // Send email & SMS notification to expert
     try {
-      await fetch('/api/expert/help-requests', {
+      const response = await fetch('/api/expert/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           expertEmail: expert.email,
-          requesterName: 'Stream Viewer',
-          topic: `Assistance needed on stream: ${stream.title}`,
+          expertPhone: expert.phone,
+          expertName: expert.name,
+          requesterName,
+          requesterEmail: user?.email,
+          topic: `Help needed on: ${stream?.title || 'Live Stream'}`,
           urgency: 'medium',
           streamId: params.id,
+          streamUrl,
         }),
       })
+
+      if (response.ok) {
+        alert(`✅ ${expert.name} has been notified!\n\n📧 Email sent to ${expert.email}\n💬 Text message sent to their phone\n\nThey should respond soon!`)
+      } else {
+        throw new Error('Notification failed')
+      }
     } catch (error) {
-      console.log('Help request sent (offline mode)')
+      console.error('Notification error:', error)
+      // Fallback to manual contact
+      alert(`⚠️ Automatic notification failed.\n\nManually contacting ${expert.name}...\n\nEmail: ${expert.email}\nPhone: ${expert.phone}`)
+      window.open(`mailto:${expert.email}?subject=Help Request from Nextwork Live Stream&body=Hi ${expert.name},%0D%0A%0D%0AI need help with the stream: ${streamUrl}`, '_blank')
     }
-
-    // Open email client
-    window.open(`mailto:${expert.email}?subject=Help Request from Nextwork Live Stream&body=Hi ${expert.name},%0D%0A%0D%0AI need help with...`, '_blank')
-
-    // Open SMS (this will open the default SMS app on mobile, or prompt for SMS app on desktop)
-    const smsBody = `Hi ${expert.name}, I need help with the Nextwork live stream. Can you assist?`
-    window.open(`sms:${expert.phone}?body=${encodeURIComponent(smsBody)}`, '_blank')
-
-    // Show confirmation
-    alert(`Contacting ${expert.name}...\n\n✅ Expert has been notified!\n\nEmail client and messaging app have been opened.\nYou can now send your message via email or text.`)
 
     setShowExpertDropdown(false)
   }
@@ -296,8 +329,31 @@ export default function StreamPage({
               <div className="w-full bg-gradient-to-br from-blue-900/80 to-gray-900/80 rounded-2xl shadow-xl p-8 flex flex-col items-center border border-blue-800">
                 {showStreamForm ? (
                 <>
+                  <div className="w-full max-w-2xl mb-4">
+                    <BackButton href="/dashboard" label="Back to Dashboard" className="text-white/70 hover:text-white" />
+                  </div>
+                  
                   <h2 className="text-2xl font-bold text-white mb-4 text-center">Set Up Your Live Stream</h2>
                   <p className="text-gray-300 mb-6 text-center max-w-lg">Fill in the details below before going live</p>
+                  
+                  {activeStream && (
+                    <div className="w-full max-w-2xl mb-6 p-4 rounded-lg bg-green-500/10 border-2 border-green-500 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-semibold text-green-400 mb-1">
+                          🔴 You Have an Active Stream
+                        </h3>
+                        <p className="text-sm text-gray-300">
+                          "{activeStream.title}" is currently live
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => router.push(`/stream/${activeStream.id}`)}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        Return to Stream
+                      </button>
+                    </div>
+                  )}
                   
                   <div className="w-full max-w-2xl space-y-4">
                     {/* Streamer Name (Read-only) */}
