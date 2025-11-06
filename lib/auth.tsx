@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const signUp = async (email: string, password: string, username: string, displayName: string) => {
+  const signUp = async (email: string, password: string) => {
     // First create the auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -89,6 +89,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Then create the profile
     if (authData.user) {
+      // Auto-generate username and display name from email
+      const emailPrefix = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+      const username = emailPrefix + '_' + authData.user.id.substring(0, 6)
+      const displayName = email.split('@')[0]
+      
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({

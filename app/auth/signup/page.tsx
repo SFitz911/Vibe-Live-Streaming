@@ -10,8 +10,6 @@ export default function SignupPage() {
   const { signUp } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -20,14 +18,7 @@ export default function SignupPage() {
     setError('')
     setLoading(true)
 
-    // Validate username (alphanumeric and underscores only)
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setError('Username can only contain letters, numbers, and underscores')
-      setLoading(false)
-      return
-    }
-
-    const { error: signUpError } = await signUp(email, password, username, displayName)
+    const { error: signUpError } = await signUp(email, password)
 
     if (signUpError) {
       setError(signUpError.message)
@@ -52,37 +43,6 @@ export default function SignupPage() {
                 {error}
               </div>
             )}
-
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-300 mb-2">
-                Display Name
-              </label>
-              <input
-                id="displayName"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="John Doe"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="johndoe"
-              />
-              <p className="text-xs text-gray-500 mt-1">Letters, numbers, and underscores only</p>
-            </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
