@@ -154,51 +154,30 @@ export default function AdminPage() {
   const handleSearchUser = async () => {
     if (!searchEmail.trim()) return
 
-    const { data: userData } = await supabase
-      .from('auth.users')
-      .select('id, email')
-      .eq('email', searchEmail.toLowerCase().trim())
+    // Search profiles directly (can't query auth.users from client)
+    const searchTerm = searchEmail.toLowerCase().trim()
+    
+    const { data: profileData, error: searchError } = await supabase
+      .from('profiles')
+      .select(`
+        *,
+        streams (id),
+        user_project_completions (
+          id,
+          nextwork_projects (title)
+        )
+      `)
+      .or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
+      .limit(1)
       .single()
 
-    if (!userData) {
-      // Try searching profiles
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          username,
-          display_name,
-          streams (id),
-          user_project_completions (
-            id,
-            nextwork_projects (title)
-          )
-        `)
-        .or(`username.ilike.%${searchEmail}%,display_name.ilike.%${searchEmail}%`)
-        .limit(1)
-        .single()
-
-      if (profileData) {
-        setSelectedUser(profileData)
-      } else {
-        alert('User not found. Try searching by exact email address.')
-      }
-    } else {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          streams (id),
-          user_project_completions (
-            id,
-            nextwork_projects (title)
-          )
-        `)
-        .eq('id', userData.id)
-        .single()
-
-      setSelectedUser(profileData)
+    if (searchError || !profileData) {
+      alert('User not found. Try searching by username or display name.')
+      console.error('Search error:', searchError)
+      return
     }
+
+    setSelectedUser(profileData)
   }
 
   const handleMarkProjectComplete = async () => {
@@ -207,21 +186,33 @@ export default function AdminPage() {
       return
     }
 
+    console.log('Marking project complete:', {
+      user_id: selectedUser.id,
+      project_id: selectedProject,
+      verified_by: user?.id
+    })
+
     setActionLoading(true)
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_project_completions')
         .insert({
           user_id: selectedUser.id,
           project_id: selectedProject,
           verified_by: user?.id,
-          notes: completionNotes,
+          notes: completionNotes || null,
         })
+        .select()
+
+      console.log('Insert result:', { data, error })
 
       if (error) {
         if (error.code === '23505') {
           alert('This user has already completed this project!')
+        } else if (error.code === '23503') {
+          // Foreign key violation
+          alert(`Database error: ${error.message}\n\nMake sure user profile exists and project is valid.`)
         } else {
           throw error
         }
@@ -233,9 +224,10 @@ export default function AdminPage() {
         // Refresh selected user data
         handleSearchUser()
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error marking completion:', error)
-      alert('Failed to mark project complete')
+      const errorMsg = error?.message || error?.details || error?.hint || 'Unknown error'
+      alert(`Failed to mark project complete:\n\n${errorMsg}`)
     } finally {
       setActionLoading(false)
     }
