@@ -320,6 +320,7 @@ function RecordingManager({
                 // Add video tracks (camera or screen share)
                 localParticipant.videoTrackPublications.forEach((pub) => {
                     if (pub.track) {
+                        console.log(`📹 Adding video track: ${pub.source} (${pub.track.kind})`);
                         stream.addTrack(pub.track.mediaStreamTrack);
                     }
                 });
@@ -363,7 +364,9 @@ function RecordingManager({
                 setMediaRecorder(recorder);
                 currentRecorder = recorder;
                 
-                console.log('✅ Recording started successfully!');
+                const videoTracks = stream.getVideoTracks();
+                const audioTracks = stream.getAudioTracks();
+                console.log(`✅ Recording started successfully! Capturing ${videoTracks.length} video track(s) and ${audioTracks.length} audio track(s)`);
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
@@ -378,8 +381,11 @@ function RecordingManager({
                 currentRecorder.stop();
             }
             
-            // Restart recording after a brief delay to capture new track
-            setTimeout(startRecording, 500);
+            // Reset attempts counter for fresh start
+            attempts = 0;
+            
+            // Restart recording after a delay to ensure new track is fully ready
+            setTimeout(startRecording, 1500);
         };
 
         localParticipant.on('trackPublished', handleTrackPublished);
