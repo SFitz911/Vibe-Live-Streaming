@@ -193,7 +193,7 @@ export default function HomePage() {
                 Watch Anytime
               </span>
             </div>
-            <Link href="/discover" className="text-primary hover:text-primary/80 transition-colors font-medium">
+            <Link href="/recordings" className="text-primary hover:text-primary/80 transition-colors font-medium">
               View All →
             </Link>
           </div>
