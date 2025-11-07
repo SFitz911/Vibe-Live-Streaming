@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { 
   BarChart3, TrendingUp, Eye, Clock, Calendar, Award,
-  Users, Video, Star, Zap, Target, Trophy, Settings
+  Users, Video, Star, Zap, Target, Trophy, Settings, Shield
 } from 'lucide-react'
 import Link from 'next/link'
 
