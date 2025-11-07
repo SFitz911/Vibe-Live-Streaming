@@ -77,6 +77,7 @@ export default function LiveKitGoLive({
     const [streamId, setStreamId] = useState<string | null>(null);
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+    const recordedChunksRef = useRef<Blob[]>([]); // Ref for synchronous access
 
     // Auto-end stream on browser close or tab close
     useEffect(() => {
@@ -129,33 +130,40 @@ export default function LiveKitGoLive({
     };
 
     const handleLeave = async () => {
-        // Stop recording if active
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        // Stop recording if active and wait for it to finish
+        if (mediaRecorder && mediaRecorder.state !== 'inactive' && streamId) {
             mediaRecorder.stop();
-        }
+            
+            // Wait a moment for the onstop handler to collect final chunks
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Get chunks from ref (synchronous access)
+            const allChunks = recordedChunksRef.current;
+            
+            if (allChunks.length > 0) {
+                try {
+                    console.log(`Uploading recording with ${allChunks.length} chunks...`);
+                    const blob = new Blob(allChunks, { type: 'video/webm' });
+                    
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                    formData.append('streamId', streamId);
 
-        // Upload recording if we have chunks
-        if (recordedChunks.length > 0 && streamId) {
-            try {
-                console.log('Uploading recording...');
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                
-                const formData = new FormData();
-                formData.append('file', blob);
-                formData.append('streamId', streamId);
+                    const response = await fetch('/api/streams/upload-recording', {
+                        method: 'POST',
+                        body: formData,
+                    });
 
-                const response = await fetch('/api/streams/upload-recording', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    console.log('Recording uploaded successfully!');
-                } else {
-                    console.error('Failed to upload recording');
+                    if (response.ok) {
+                        console.log('Recording uploaded successfully!');
+                    } else {
+                        console.error('Failed to upload recording');
+                    }
+                } catch (error) {
+                    console.error('Error uploading recording:', error);
                 }
-            } catch (error) {
-                console.error('Error uploading recording:', error);
+            } else {
+                console.log('No chunks to upload');
             }
         }
 
@@ -209,6 +217,7 @@ export default function LiveKitGoLive({
                     onLeave={handleLeave}
                     setMediaRecorder={setMediaRecorder}
                     setRecordedChunks={setRecordedChunks}
+                    recordedChunksRef={recordedChunksRef}
                     streamId={streamId}
                 />
             </LiveKitRoom>
@@ -236,11 +245,13 @@ function VideoWithZoom({
     onLeave, 
     setMediaRecorder, 
     setRecordedChunks,
+    recordedChunksRef,
     streamId 
 }: { 
     onLeave: () => void;
     setMediaRecorder: (recorder: MediaRecorder | null) => void;
     setRecordedChunks: React.Dispatch<React.SetStateAction<Blob[]>>;
+    recordedChunksRef: React.MutableRefObject<Blob[]>;
     streamId?: string | null;
 }) {
     const [zoom, setZoom] = useState(1);
@@ -252,6 +263,7 @@ function VideoWithZoom({
             <RecordingManager 
                 setMediaRecorder={setMediaRecorder}
                 setRecordedChunks={setRecordedChunks}
+                recordedChunksRef={recordedChunksRef}
             />
             
             {/* Video Area with Zoom Controls */}
@@ -276,9 +288,11 @@ function VideoWithZoom({
 function RecordingManager({
     setMediaRecorder,
     setRecordedChunks,
+    recordedChunksRef,
 }: {
     setMediaRecorder: (recorder: MediaRecorder | null) => void;
     setRecordedChunks: React.Dispatch<React.SetStateAction<Blob[]>>;
+    recordedChunksRef: React.MutableRefObject<Blob[]>;
 }) {
     const { localParticipant } = useLocalParticipant();
 
@@ -325,7 +339,11 @@ function RecordingManager({
 
                 recorder.onstop = () => {
                     console.log('Recording stopped, total chunks:', chunks.length);
-                    setRecordedChunks(prevChunks => [...prevChunks, ...chunks]);
+                    setRecordedChunks(prevChunks => {
+                        const newChunks = [...prevChunks, ...chunks];
+                        recordedChunksRef.current = newChunks; // Also update ref
+                        return newChunks;
+                    });
                 };
 
                 // Start recording (collect data every 1 second)
