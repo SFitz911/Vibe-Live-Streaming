@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         category: category || 'Web Development',
         tags: tags || [],
         stream_key: roomName,
-        playback_url: `ws://localhost:7880/${roomName}`,
+        playback_url: null, // Will be set by upload-recording API after stream ends
         is_live: true,
         viewer_count: 0,
         started_at: new Date().toISOString(),
