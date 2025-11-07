@@ -83,9 +83,9 @@ export async function captureLiveStreamThumbnail(
       // Start recording thumbnail
       recorder.start()
 
-      // Draw video frames to canvas for 3 seconds
+      // Draw video frames to canvas for 15 seconds
       let frameCount = 0
-      const maxFrames = 30 * 3 // 3 seconds at 30fps = 90 frames
+      const maxFrames = 30 * 15 // 15 seconds at 30fps = 450 frames
       
       const drawFrame = () => {
         if (frameCount >= maxFrames) {
