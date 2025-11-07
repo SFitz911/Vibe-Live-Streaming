@@ -10,11 +10,7 @@ CREATE TABLE IF NOT EXISTS public.direct_messages (
   recipient_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   message TEXT NOT NULL,
   is_read BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  
-  -- Indexes for fast queries
-  CONSTRAINT direct_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES profiles(id),
-  CONSTRAINT direct_messages_recipient_id_fkey FOREIGN KEY (recipient_id) REFERENCES profiles(id)
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create indexes for performance
