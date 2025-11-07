@@ -25,6 +25,8 @@ export default function AdminPage() {
   
   // User search and project marking
   const [searchEmail, setSearchEmail] = useState('')
+  const [allUsers, setAllUsers] = useState<any[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [selectedProject, setSelectedProject] = useState('')
   const [completionNotes, setCompletionNotes] = useState('')
@@ -39,6 +41,19 @@ export default function AdminPage() {
     checkAdminAccess()
   }, [user, profile])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.user-search-container')) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const checkAdminAccess = async () => {
     if (!user) {
       router.push('/auth/login')
@@ -52,6 +67,13 @@ export default function AdminPage() {
   }
 
   const fetchAllData = async () => {
+    // Fetch all users for autocomplete
+    const { data: usersData } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, email, avatar_url')
+      .order('username')
+    setAllUsers(usersData || [])
+
     // Fetch stats
     const { count: userCount } = await supabase
       .from('profiles')
@@ -151,12 +173,20 @@ export default function AdminPage() {
     }
   }
 
-  const handleSearchUser = async () => {
-    if (!searchEmail.trim()) return
-
-    // Search profiles directly (can't query auth.users from client)
+  // Filter users based on search input
+  const filteredUsers = allUsers.filter(u => {
     const searchTerm = searchEmail.toLowerCase().trim()
+    if (!searchTerm) return true // Show all if empty
     
+    return (
+      u.username?.toLowerCase().includes(searchTerm) ||
+      u.display_name?.toLowerCase().includes(searchTerm) ||
+      u.email?.toLowerCase().includes(searchTerm)
+    )
+  }).slice(0, 10) // Limit to 10 results
+
+  const handleSelectUser = async (userId: string) => {
+    // Fetch full user data with related records
     const { data: profileData, error: searchError } = await supabase
       .from('profiles')
       .select(`
@@ -167,17 +197,18 @@ export default function AdminPage() {
           nextwork_projects (title)
         )
       `)
-      .or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%`)
-      .limit(1)
+      .eq('id', userId)
       .single()
 
     if (searchError || !profileData) {
-      alert('User not found. Try searching by username or display name.')
+      alert('Error loading user data')
       console.error('Search error:', searchError)
       return
     }
 
     setSelectedUser(profileData)
+    setSearchEmail(profileData.display_name || profileData.username || '')
+    setShowDropdown(false)
   }
 
   const handleMarkProjectComplete = async () => {
@@ -222,7 +253,9 @@ export default function AdminPage() {
         setSelectedProject('')
         await fetchAllData()
         // Refresh selected user data
-        handleSearchUser()
+        if (selectedUser) {
+          await handleSelectUser(selectedUser.id)
+        }
       }
     } catch (error: any) {
       console.error('Error marking completion:', error)
@@ -309,27 +342,59 @@ export default function AdminPage() {
               Mark Project Complete
             </h2>
 
-            {/* User Search */}
-            <div className="mb-4">
+            {/* User Search with Autocomplete */}
+            <div className="mb-4 relative user-search-container">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Search User (Email or Username)
               </label>
-              <div className="flex space-x-2">
+              <div className="relative">
                 <input
                   type="text"
                   value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearchUser()}
-                  placeholder="user@example.com or username"
-                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setSearchEmail(e.target.value)
+                    setShowDropdown(true)
+                    if (selectedUser && e.target.value !== (selectedUser.display_name || selectedUser.username)) {
+                      setSelectedUser(null) // Clear selection if typing
+                    }
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="Start typing to search..."
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                 />
-                <button
-                  onClick={handleSearchUser}
-                  className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white rounded-lg transition-colors"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
               </div>
+
+              {/* Autocomplete Dropdown */}
+              {showDropdown && filteredUsers.length > 0 && !selectedUser && (
+                <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                  {filteredUsers.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => handleSelectUser(user.id)}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                    >
+                      <div className="flex items-center space-x-3">
+                        {user.avatar_url ? (
+                          <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                            {(user.display_name || user.username)?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-medium text-sm truncate">
+                            {user.display_name || user.username}
+                          </p>
+                          <p className="text-gray-400 text-xs truncate">
+                            @{user.username}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Selected User Info */}
