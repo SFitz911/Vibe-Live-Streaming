@@ -2,32 +2,78 @@
 
 import { AlertCircle } from 'lucide-react'
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth'
 
-export default function TestExpertNotificationButton() {
+interface ExpertNotificationProps {
+  streamId?: string
+  streamTitle?: string
+}
+
+export default function TestExpertNotificationButton({ streamId, streamTitle }: ExpertNotificationProps = {}) {
+  const { user, profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium')
 
-  const triggerTestExpertNotification = () => {
+  const triggerTestExpertNotification = async () => {
+    if (!user) {
+      alert('Please log in to send messages')
+      return
+    }
+
     setLoading(true)
     
-    // Create a custom event that the expert notification component will listen for
-    const event = new CustomEvent('expertHelpRequest', {
-      detail: {
-        id: `help-test-${Date.now()}`,
-        requesterName: 'John Student',
-        topic: urgency === 'high' 
-          ? 'URGENT: AWS Deployment Failing' 
-          : urgency === 'medium'
-          ? 'Question about Docker Configuration'
-          : 'General AI Learning Question',
-        urgency: urgency,
-        timestamp: new Date().toISOString(),
-        streamId: 'test-stream',
+    try {
+      // Get all staff/expert users (verified users)
+      const { data: staffUsers } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('is_verified', true)
+
+      if (!staffUsers || staffUsers.length === 0) {
+        alert('No staff members available at the moment')
+        setLoading(false)
+        return
       }
-    })
-    window.dispatchEvent(event)
-    
-    setTimeout(() => setLoading(false), 500)
+
+      // Create urgency message
+      const urgencyText = urgency === 'high' ? '🚨 HIGH PRIORITY' : urgency === 'medium' ? '⚠️ MEDIUM' : '💬 LOW'
+      const streamInfo = streamTitle ? ` in "${streamTitle}"` : ''
+      const messageText = `${urgencyText} Question${streamInfo}\n\nStudent needs help! Please check the live stream chat or send a direct message.`
+
+      // Send DM to all staff members
+      const messages = staffUsers.map(staff => ({
+        sender_id: user.id,
+        recipient_id: staff.id,
+        message: messageText,
+      }))
+
+      const { error } = await supabase
+        .from('direct_messages')
+        .insert(messages)
+
+      if (error) throw error
+
+      // Also dispatch event for legacy notification system
+      const event = new CustomEvent('expertHelpRequest', {
+        detail: {
+          id: `help-${Date.now()}`,
+          requesterName: profile?.display_name || profile?.username || 'Student',
+          topic: messageText,
+          urgency: urgency,
+          timestamp: new Date().toISOString(),
+          streamId: streamId || 'unknown',
+        }
+      })
+      window.dispatchEvent(event)
+
+      alert('✅ Staff members have been notified!')
+    } catch (error) {
+      console.error('Error notifying staff:', error)
+      alert('Failed to notify staff. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

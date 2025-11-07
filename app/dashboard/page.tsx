@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import { supabase, Stream } from '@/lib/supabase'
-import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube, Award, ThumbsUp, Shield } from 'lucide-react'
+import { Video, Plus, Settings, BarChart3, Users, Trash2, Youtube, Award, ThumbsUp, Shield, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import UserLevelBadge, { calculateUserLevel } from '@/components/UserLevelBadge'
@@ -283,10 +283,13 @@ export default function DashboardPage() {
               <span className="font-semibold">Import YouTube</span>
             </Link>
             
-            <button className="bg-purple-500/20 hover:bg-purple-500/30 border-2 border-purple-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors">
-              <Settings className="h-6 w-6" />
-              <span className="font-semibold">Stream Settings</span>
-            </button>
+            <Link
+              href="/dashboard/messages"
+              className="bg-purple-500/20 hover:bg-purple-500/30 border-2 border-purple-500 text-white p-6 rounded-lg flex items-center space-x-3 transition-colors"
+            >
+              <MessageSquare className="h-6 w-6" />
+              <span className="font-semibold">Messages</span>
+            </Link>
 
             <Link
               href="/dashboard/analytics"

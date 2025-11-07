@@ -13,6 +13,7 @@ export default function Navigation() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [userStreams, setUserStreams] = useState<any[]>([])
   const [userLevel, setUserLevel] = useState({ level: 1, totalPoints: 0 })
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,7 +48,57 @@ export default function Navigation() {
       setUserStreams(data)
       setUserLevel(calculateUserLevel(data))
     }
+
+    // Also fetch unread message count
+    fetchUnreadCount(userId)
   }
+
+  const fetchUnreadCount = async (userId: string) => {
+    const { count } = await supabase
+      .from('direct_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', userId)
+      .eq('is_read', false)
+
+    setUnreadCount(count || 0)
+  }
+
+  // Subscribe to new messages for real-time notification updates
+  useEffect(() => {
+    if (!user) return
+
+    const channel = supabase
+      .channel('nav-messages-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `recipient_id=eq.${user.id}`
+        },
+        () => {
+          fetchUnreadCount(user.id)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `recipient_id=eq.${user.id}`
+        },
+        () => {
+          fetchUnreadCount(user.id)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -99,16 +150,23 @@ export default function Navigation() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
-            {/* Search */}
-            <button className="p-2 rounded-lg hover:bg-muted/50 transition-colors">
-              <Search size={20} className="text-muted-foreground" />
-            </button>
-
-            {/* Notifications */}
-            <button className="p-2 rounded-lg hover:bg-muted/50 transition-colors relative">
-              <Bell size={20} className="text-muted-foreground" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-            </button>
+            {/* Messages Notification Bell */}
+            {user && (
+              <Link 
+                href="/dashboard/messages"
+                className="p-2 rounded-lg hover:bg-muted/50 transition-colors relative"
+              >
+                <Bell 
+                  size={20} 
+                  className={unreadCount > 0 ? "text-green-500" : "text-muted-foreground"} 
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {user ? (
               <div className="flex items-center space-x-3">
