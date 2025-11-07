@@ -41,8 +41,17 @@ CREATE POLICY "Users can update their own sent messages"
 ON public.direct_messages FOR UPDATE
 USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
 
--- Enable Realtime for instant messaging
-ALTER PUBLICATION supabase_realtime ADD TABLE public.direct_messages;
+-- Enable Realtime for instant messaging (skip if already added)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+    AND tablename = 'direct_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.direct_messages;
+  END IF;
+END $$;
 
 -- Success message
 SELECT '✅ Direct messages table created!' as status;
