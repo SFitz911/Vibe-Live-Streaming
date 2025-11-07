@@ -79,8 +79,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
                   e.currentTarget.pause()
                   e.currentTarget.currentTime = 0 // Reset to start
                 }}
-                style={{ pointerEvents: 'none' }}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
               />
             ) : (
               // Static image thumbnail (YouTube or uploaded)
