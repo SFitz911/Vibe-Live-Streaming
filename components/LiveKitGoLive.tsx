@@ -195,7 +195,7 @@ export default function LiveKitGoLive({
         <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 w-full">
             <LiveKitRoom
                 token={token!}
-                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880"}
+                serverUrl="wss://videostreamv5-yz05w4m7.livekit.cloud"
                 connect={true}
                 data-lk-theme="default"
                 onDisconnected={handleLeave}
