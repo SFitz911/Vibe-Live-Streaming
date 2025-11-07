@@ -183,7 +183,7 @@ export default function AdminPage() {
       u.display_name?.toLowerCase().includes(searchTerm) ||
       u.email?.toLowerCase().includes(searchTerm)
     )
-  }).slice(0, 10) // Limit to 10 results
+  }).slice(0, 20) // Limit to 20 results for better visibility
 
   const handleSelectUser = async (userId: string) => {
     // Fetch full user data with related records
@@ -290,11 +290,15 @@ export default function AdminPage() {
           <BackButton href="/dashboard" label="Back to Dashboard" />
         </div>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            🎓 Nextwork.org Admin Dashboard
-          </h1>
-          <p className="text-gray-400">
+        {/* Centered Header with Admin Badge */}
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <Shield className="h-8 w-8 text-yellow-400 mr-3" />
+            <h1 className="text-4xl font-bold text-white">
+              Admin Dashboard
+            </h1>
+          </div>
+          <p className="text-gray-400 text-lg">
             Manage users, projects, and track platform analytics
           </p>
         </div>
@@ -345,7 +349,7 @@ export default function AdminPage() {
             {/* User Search with Autocomplete */}
             <div className="mb-4 relative user-search-container">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Search User (Email or Username)
+                Select User
               </label>
               <div className="relative">
                 <input
@@ -359,26 +363,32 @@ export default function AdminPage() {
                     }
                   }}
                   onFocus={() => setShowDropdown(true)}
-                  placeholder="Start typing to search..."
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                  onClick={() => setShowDropdown(true)}
+                  placeholder="Click to see all users or type to search..."
+                  className="w-full px-4 py-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 pr-10 cursor-pointer"
                 />
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
               </div>
 
               {/* Autocomplete Dropdown */}
               {showDropdown && filteredUsers.length > 0 && !selectedUser && (
-                <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-yellow-500 rounded-lg shadow-2xl max-h-80 overflow-y-auto">
+                  <div className="sticky top-0 bg-gray-700 px-4 py-2 border-b border-gray-600">
+                    <p className="text-xs text-gray-300 font-semibold">
+                      {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} found
+                    </p>
+                  </div>
                   {filteredUsers.map((user) => (
                     <button
                       key={user.id}
                       onClick={() => handleSelectUser(user.id)}
-                      className="w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                      className="w-full px-4 py-3 text-left hover:bg-yellow-600/20 hover:border-l-4 hover:border-yellow-500 transition-all border-b border-gray-700 last:border-b-0"
                     >
                       <div className="flex items-center space-x-3">
                         {user.avatar_url ? (
-                          <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                          <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full border-2 border-gray-600" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-sm font-bold border-2 border-gray-600">
                             {(user.display_name || user.username)?.[0]?.toUpperCase()}
                           </div>
                         )}
