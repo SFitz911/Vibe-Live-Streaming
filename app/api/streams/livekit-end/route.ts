@@ -41,11 +41,8 @@ export async function POST(request: NextRequest) {
       recently_live_until: thirtyMinutesFromNow.toISOString(), // Stay in "Live Now" for 30 min
     }
 
-    // If stream has a thumbnail but no playback_url, set playback_url to thumbnail
-    // This makes the recording "playable" (shows the thumbnail as the recording)
-    if (currentStream.thumbnail_url && !currentStream.playback_url) {
-      updateData.playback_url = currentStream.thumbnail_url
-    }
+    // Note: playback_url will be set by the upload-recording API after the full recording uploads
+    // Do NOT set it to thumbnail_url here!
 
     // Update the stream - mark as ended but keep visible in "Live Now" for 30 min
     const { error: updateError } = await supabase
