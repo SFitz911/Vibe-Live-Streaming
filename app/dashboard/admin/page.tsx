@@ -116,7 +116,7 @@ export default function AdminPage() {
     setRecentCompletions(completionsData || [])
 
     // Fetch top streamers
-    const { data: usersData } = await supabase
+    const { data: streamersData } = await supabase
       .from('profiles')
       .select(`
         id,
@@ -126,8 +126,8 @@ export default function AdminPage() {
       `)
       .limit(10)
     
-    if (usersData) {
-      const streamersWithStats = usersData.map((u: any) => ({
+    if (streamersData) {
+      const streamersWithStats = streamersData.map((u: any) => ({
         ...u,
         totalStreams: u.streams?.length || 0,
         totalViews: u.streams?.reduce((acc: number, s: any) => acc + (s.viewer_count || 0), 0) || 0
