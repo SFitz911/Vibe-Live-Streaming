@@ -384,14 +384,14 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
                 clearTimeout(thumbnailTimerRef.current);
             }
 
-            // Schedule thumbnail capture (2 minutes after going live)
+            // Schedule thumbnail capture (5 seconds after going live)
             thumbnailTimerRef.current = scheduleAutomaticThumbnailCapture(
                 videoRef.current,
                 streamId,
-                2 // Capture after 2 minutes
+                0.083 // Capture after 5 seconds (0.083 minutes)
             );
 
-            console.log('🎬 Auto-thumbnail scheduled for 2 minutes from now...');
+            console.log('🎬 Auto-thumbnail scheduled for 5 seconds from now...');
         }
 
         // Cleanup timer on unmount
