@@ -69,6 +69,14 @@ export default function VideoPlayer({
           muted={muted}
           playsInline
           crossOrigin="anonymous"
+          onLoadedData={(e) => {
+            // Explicitly play to ensure autoplay works
+            if (autoplay) {
+              (e.target as HTMLVideoElement).play().catch(err => 
+                console.log('Autoplay prevented:', err)
+              )
+            }
+          }}
         >
           Your browser does not support the video tag.
         </video>
