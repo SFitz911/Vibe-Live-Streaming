@@ -299,6 +299,10 @@ function RecordingManager({
     useEffect(() => {
         if (!localParticipant) return;
 
+        let attempts = 0;
+        const maxAttempts = 10; // Try for up to 10 seconds
+        let timeoutId: NodeJS.Timeout;
+
         // Get all local tracks (camera and screen share)
         const startRecording = async () => {
             try {
@@ -320,8 +324,15 @@ function RecordingManager({
                 });
 
                 if (stream.getTracks().length === 0) {
-                    console.log('No tracks available for recording yet');
-                    return;
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        console.log(`No tracks available for recording yet (attempt ${attempts}/${maxAttempts}), retrying...`);
+                        timeoutId = setTimeout(startRecording, 1000);
+                        return;
+                    } else {
+                        console.error('Failed to start recording: No tracks available after multiple attempts');
+                        return;
+                    }
                 }
 
                 // Create MediaRecorder
@@ -350,16 +361,16 @@ function RecordingManager({
                 recorder.start(1000);
                 setMediaRecorder(recorder);
                 
-                console.log('Recording started');
+                console.log('✅ Recording started successfully!');
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         };
 
-        // Small delay to ensure tracks are published
-        const timeout = setTimeout(startRecording, 1000);
+        // Small delay to ensure tracks are published, then start trying
+        timeoutId = setTimeout(startRecording, 1000);
 
-        return () => clearTimeout(timeout);
+        return () => clearTimeout(timeoutId);
     }, [localParticipant, setMediaRecorder, setRecordedChunks]);
 
     return null; // This component doesn't render anything
