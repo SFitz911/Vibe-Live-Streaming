@@ -1,8 +1,8 @@
-# 📸 Automatic Live Stream Thumbnail Capture
+# 🎬 Automatic Live Stream Thumbnail Capture
 
 ## Overview
 
-The platform automatically captures static image thumbnails from live streams. This creates professional-looking thumbnails that help viewers see what's happening before they join, while keeping storage and bandwidth usage minimal.
+The platform automatically captures 15-second video clips from live streams to use as thumbnails. Videos are paused by default (showing first frame) and only play when you hover over them, keeping bandwidth usage minimal while maintaining visual quality.
 
 ---
 
@@ -14,18 +14,19 @@ The platform automatically captures static image thumbnails from live streams. T
 
 ### 2. **Auto-Capture After 2 Minutes**
 - After streaming for **2 minutes**, the system automatically:
-  - Captures a **single frame snapshot** (JPEG image) from the live stream
+  - Records a **15-second video clip** from the live stream
   - Uploads it to Supabase Storage (`stream-recordings/thumbnails/`)
   - Updates the stream record with the new thumbnail URL
 
 ### 3. **Thumbnail Display**
-- The captured image **replaces** the placeholder
+- The video **replaces** the placeholder
 - Displays on:
   - Homepage (Live Now section)
   - Discover page (All live streams)
   - Stream cards everywhere
-- Static image - fast loading, minimal bandwidth
-- Scales smoothly on hover for visual feedback
+- **Paused by default** - Shows first frame (no bandwidth used)
+- **Plays on hover** - Animated preview when user hovers
+- **Resets on mouse leave** - Returns to first frame
 
 ---
 
@@ -34,7 +35,7 @@ The platform automatically captures static image thumbnails from live streams. T
 ### Files Modified
 
 1. **`lib/thumbnail.ts`** (NEW)
-   - `captureLiveStreamThumbnail()` - Captures single frame as JPEG
+   - `captureLiveStreamThumbnail()` - Captures 15-second video clip
    - `scheduleAutomaticThumbnailCapture()` - Schedules capture after X minutes
 
 2. **`components/LiveKitGoLive.tsx`**
@@ -43,9 +44,10 @@ The platform automatically captures static image thumbnails from live streams. T
    - Triggers after 2 minutes of streaming
 
 3. **`components/StreamCard.tsx`**
-   - Displays thumbnail images
-   - Smooth scaling on hover for visual feedback
-   - Fallback to placeholder if no thumbnail
+   - Detects `.webm` video thumbnails
+   - Paused by default (shows first frame)
+   - Plays on hover, resets on mouse leave
+   - Fallback to static image or placeholder
 
 4. **`supabase-thumbnail-storage.sql`** (NEW)
    - Storage policies for thumbnail uploads
@@ -56,7 +58,7 @@ The platform automatically captures static image thumbnails from live streams. T
 ```
 stream-recordings/
 ├── thumbnails/
-│   ├── thumbnail_STREAM_ID_TIMESTAMP.jpg  (static images)
+│   ├── thumbnail_STREAM_ID_TIMESTAMP.webm  (15-second clips)
 │   └── ...
 └── recordings/
     ├── STREAM_ID.webm  (full recordings)
@@ -81,21 +83,26 @@ thumbnailTimerRef.current = scheduleAutomaticThumbnailCapture(
 );
 ```
 
-### Image Quality
+### Video Quality
 
-Default: **85% JPEG quality**, 1280x720 resolution
+Default: **2.5 Mbps** bitrate, 1280x720 resolution, 15 seconds
 
 To change quality, edit `lib/thumbnail.ts`:
 
 ```typescript
-canvas.toBlob(
-  (blob) => resolve(blob),
-  'image/jpeg',
-  0.85 // Change this (0.0 to 1.0, higher = better quality)
-)
+const recorder = new MediaRecorder(canvasStream, {
+  mimeType: 'video/webm;codecs=vp9',
+  videoBitsPerSecond: 2500000, // Change this (bits per second)
+})
 ```
 
-To change resolution, edit `lib/thumbnail.ts`:
+To change duration:
+
+```typescript
+const maxFrames = 30 * 15 // 30fps * seconds (change 15 to desired seconds)
+```
+
+To change resolution:
 
 ```typescript
 canvas.width = 1280  // Change width
@@ -108,10 +115,10 @@ canvas.height = 720  // Change height
 
 ### File Sizes
 
-- **Static JPEG** at 85% quality ≈ **100-200 KB per thumbnail**
-- 10x smaller than video clips
+- **15-second clip** at 2.5 Mbps ≈ **2-3 MB per thumbnail**
 - Much smaller than full recordings
 - Automatically overwrites if stream restarts
+- **Bandwidth efficient** - Only loads/plays on hover
 
 ### Cleanup
 

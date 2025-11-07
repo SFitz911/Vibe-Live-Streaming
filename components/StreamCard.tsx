@@ -63,12 +63,32 @@ export default function StreamCard({ stream }: StreamCardProps) {
         <div className="relative aspect-video bg-muted overflow-hidden">
           {/* Thumbnail Display Logic */}
           {stream.thumbnail_url ? (
-            // Static image thumbnail (YouTube, auto-captured, or uploaded)
-            <img
-              src={stream.thumbnail_url}
-              alt={stream.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+            // Check if it's a video thumbnail (.webm) or static image
+            stream.thumbnail_url.endsWith('.webm') ? (
+              // Video thumbnail - plays ONLY on hover, paused by default
+              <video
+                src={stream.thumbnail_url}
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                onMouseEnter={(e) => {
+                  e.currentTarget.play().catch(err => console.log('Play prevented:', err))
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.pause()
+                  e.currentTarget.currentTime = 0 // Reset to start
+                }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              // Static image thumbnail (YouTube or uploaded)
+              <img
+                src={stream.thumbnail_url}
+                alt={stream.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            )
           ) : stream.is_live ? (
             // Live stream without captured thumbnail yet - show placeholder
             <div className="w-full h-full flex items-center justify-center bg-black">

@@ -1,17 +1,17 @@
-# 📸 Auto-Thumbnail Feature Implementation Summary
+# 🎬 Auto-Thumbnail Feature Implementation Summary
 
 ## What Was Built
 
-Automatic capture of static image thumbnails from live streams to create professional-looking previews.
+Automatic capture of 15-second video clips from live streams. Videos are paused by default and only play on hover, providing engaging previews while keeping bandwidth usage minimal.
 
 ---
 
 ## How It Works
 
 1. **User goes live** → Shows "Nextwork.org Classroom" placeholder
-2. **After 2 minutes** → System automatically captures single frame snapshot
-3. **Upload & replace** → Uploads JPEG to Supabase Storage, updates thumbnail_url
-4. **Display everywhere** → Professional thumbnail shows on all stream cards
+2. **After 2 minutes** → System automatically captures 15-second video clip
+3. **Upload & replace** → Uploads WebM to Supabase Storage, updates thumbnail_url
+4. **Display everywhere** → Video thumbnail shows on all stream cards (paused until hover)
 
 ---
 
@@ -34,8 +34,8 @@ Automatic capture of static image thumbnails from live streams to create profess
 
 ✅ **Fully Automatic** - No manual intervention required  
 ✅ **Smart Timing** - Captures after 2 min (stable stream state)  
-✅ **Tiny Files** - Only 100-200 KB per JPEG image  
-✅ **Fast Loading** - Static images load instantly  
+✅ **Play-on-Hover** - Paused by default, plays when hovering (saves bandwidth)  
+✅ **High Quality** - 15-second video clips show actual stream content  
 ✅ **Fallback Safe** - Shows placeholder if capture fails  
 
 ---
@@ -44,18 +44,20 @@ Automatic capture of static image thumbnails from live streams to create profess
 
 ### Capture Process
 - **Resolution:** 1280x720 (720p)
-- **Format:** JPEG
-- **Quality:** 85%
-- **Type:** Single frame snapshot
-- **File Size:** ~100-200 KB
+- **Format:** WebM VP9
+- **Bitrate:** 2.5 Mbps
+- **Duration:** 15 seconds
+- **FPS:** 30
+- **File Size:** ~2-3 MB
 
 ### Storage
 - **Bucket:** `stream-recordings`
-- **Path:** `thumbnails/thumbnail_STREAMID_TIMESTAMP.jpg`
+- **Path:** `thumbnails/thumbnail_STREAMID_TIMESTAMP.webm`
 - **Access:** Public read, authenticated upload
 
 ### Browser Support
-- ✅ All browsers (universal JPEG support)
+- ✅ Chrome, Edge, Firefox (full support)
+- ⚠️ Safari 14.5+ (limited WebM support)
 
 ---
 
@@ -84,13 +86,13 @@ Automatic capture of static image thumbnails from live streams to create profess
 ## What This Solves
 
 **Before:** Live streams showed boring static placeholder  
-**After:** Professional thumbnails from actual stream content
+**After:** Engaging video previews from actual stream content
 
 **Result:** 
-- More clicks, better UX
-- Minimal storage (100-200 KB vs 2-3 MB videos)
-- Minimal bandwidth (perfect for free tier)
-- Fast page loads
+- More clicks, better engagement
+- High-quality preview (not just a static image)
+- Bandwidth efficient (paused until hover)
+- Professional appearance
 
 ---
 
