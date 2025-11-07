@@ -110,21 +110,21 @@ export default function StreamCard({ stream }: StreamCardProps) {
           
           {/* Live Badge */}
           {stream.is_live ? (
-            <div className="absolute top-3 left-3">
+            <div className="absolute top-3 left-3" style={{ pointerEvents: 'none' }}>
               <div className="live-pulse bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-2">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 <span>LIVE</span>
               </div>
             </div>
           ) : isRecentlyLive ? (
-            <div className="absolute top-3 left-3">
+            <div className="absolute top-3 left-3" style={{ pointerEvents: 'none' }}>
               <div className="bg-orange-500/90 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-2">
                 <Clock className="w-3 h-3" />
                 <span>RECENTLY LIVE</span>
               </div>
             </div>
           ) : (
-            <div className="absolute top-3 left-3">
+            <div className="absolute top-3 left-3" style={{ pointerEvents: 'none' }}>
               <div className="glass-effect bg-gray-800/80 text-gray-200 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
                 <Play className="w-3 h-3" />
                 <span>RECORDED</span>
@@ -134,7 +134,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
           
           {/* Viewer Count */}
           {(stream.is_live || isRecentlyLive) && (
-            <div className="absolute bottom-3 left-3">
+            <div className="absolute bottom-3 left-3" style={{ pointerEvents: 'none' }}>
               <div className="glass-effect text-white px-3 py-1 rounded-full text-xs flex items-center space-x-1">
                 <Eye className="w-3 h-3" />
                 <span>{formatViewerCount(stream.viewer_count)}</span>
@@ -143,7 +143,10 @@ export default function StreamCard({ stream }: StreamCardProps) {
           )}
           
           {/* Play Overlay */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
+            style={{ pointerEvents: 'none' }}
+          >
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                 <Play className="w-8 h-8 text-white ml-1" />
