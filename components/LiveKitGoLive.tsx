@@ -325,13 +325,22 @@ function RecordingManager({
                     }
                 });
 
-                // Add video tracks (camera or screen share)
-                localParticipant.videoTrackPublications.forEach((pub) => {
-                    if (pub.track) {
-                        console.log(`📹 Adding video track: ${pub.source} (${pub.track.kind})`);
-                        stream.addTrack(pub.track.mediaStreamTrack);
-                    }
-                });
+                // Add video track - prioritize screen share over camera
+                // MediaRecorder typically only records ONE video track, so we must choose
+                const screenShareTrack = Array.from(localParticipant.videoTrackPublications.values())
+                    .find(pub => pub.source === 'screen_share' && pub.track);
+                
+                const cameraTrack = Array.from(localParticipant.videoTrackPublications.values())
+                    .find(pub => pub.source === 'camera' && pub.track);
+                
+                const activeVideoTrack = screenShareTrack || cameraTrack;
+                
+                if (activeVideoTrack && activeVideoTrack.track) {
+                    console.log(`📹 Recording video from: ${activeVideoTrack.source}`);
+                    stream.addTrack(activeVideoTrack.track.mediaStreamTrack);
+                } else {
+                    console.log('⚠️ No video track found');
+                }
 
                 if (stream.getTracks().length === 0) {
                     attempts++;
