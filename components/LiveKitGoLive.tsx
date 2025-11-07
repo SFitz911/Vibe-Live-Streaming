@@ -302,6 +302,7 @@ function RecordingManager({
         let attempts = 0;
         const maxAttempts = 10; // Try for up to 10 seconds
         let timeoutId: NodeJS.Timeout;
+        let currentRecorder: MediaRecorder | null = null;
 
         // Get all local tracks (camera and screen share)
         const startRecording = async () => {
@@ -360,6 +361,7 @@ function RecordingManager({
                 // Start recording (collect data every 1 second)
                 recorder.start(1000);
                 setMediaRecorder(recorder);
+                currentRecorder = recorder;
                 
                 console.log('✅ Recording started successfully!');
             } catch (error) {
@@ -367,10 +369,31 @@ function RecordingManager({
             }
         };
 
+        // Listen for track published events (like screen share)
+        const handleTrackPublished = () => {
+            console.log('🔄 New track published, restarting recording to capture it...');
+            
+            // Stop current recording (preserves chunks)
+            if (currentRecorder && currentRecorder.state !== 'inactive') {
+                currentRecorder.stop();
+            }
+            
+            // Restart recording after a brief delay to capture new track
+            setTimeout(startRecording, 500);
+        };
+
+        localParticipant.on('trackPublished', handleTrackPublished);
+
         // Small delay to ensure tracks are published, then start trying
         timeoutId = setTimeout(startRecording, 1000);
 
-        return () => clearTimeout(timeoutId);
+        return () => {
+            clearTimeout(timeoutId);
+            localParticipant.off('trackPublished', handleTrackPublished);
+            if (currentRecorder && currentRecorder.state !== 'inactive') {
+                currentRecorder.stop();
+            }
+        };
     }, [localParticipant, setMediaRecorder, setRecordedChunks]);
 
     return null; // This component doesn't render anything
