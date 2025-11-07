@@ -160,9 +160,17 @@ export default function Navigation() {
                   className={unreadCount > 0 ? "text-green-500" : "text-muted-foreground"} 
                 />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
+                  <>
+                    {/* Pulsating green bubble for Nextwork.org admins */}
+                    {user.email?.endsWith('@nextwork.org') ? (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse"></span>
+                    ) : (
+                      /* Number badge for regular users */
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </>
                 )}
               </Link>
             )}

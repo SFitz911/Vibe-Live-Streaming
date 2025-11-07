@@ -24,17 +24,19 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
     setLoading(true)
     
     try {
-      // Get all staff/expert users (verified users)
+      // Get all admin users (@nextwork.org emails)
       const { data: staffUsers } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('is_verified', true)
+        .select('id, email')
+        .ilike('email', '%@nextwork.org')
 
       if (!staffUsers || staffUsers.length === 0) {
-        alert('No staff members available at the moment')
+        alert('No admin staff available at the moment')
         setLoading(false)
         return
       }
+
+      console.log(`Sending alert to ${staffUsers.length} Nextwork.org admins`)
 
       // Create urgency message
       const urgencyText = urgency === 'high' ? '🚨 HIGH PRIORITY' : urgency === 'medium' ? '⚠️ MEDIUM' : '💬 LOW'
