@@ -108,7 +108,6 @@ export default function Navigation() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/discover', label: 'Discover', icon: Compass },
     { href: '/dashboard', label: 'Dashboard', icon: Radio },
-    { href: '/dashboard/stream/setup', label: 'Help & Troubleshooting', icon: Settings },
   ]
 
   return (
@@ -192,10 +191,13 @@ export default function Navigation() {
                   </div>
                 </div>
 
-                {/* Settings */}
-                <button className="p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                {/* Settings - Links to Help & Troubleshooting */}
+                <Link 
+                  href="/dashboard/stream/setup"
+                  className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   <Settings size={18} className="text-muted-foreground" />
-                </button>
+                </Link>
 
                 {/* Sign Out */}
                 <button
