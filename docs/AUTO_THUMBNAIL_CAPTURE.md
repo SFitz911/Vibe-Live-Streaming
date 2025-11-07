@@ -1,8 +1,8 @@
-# 🎬 Automatic Live Stream Thumbnail Capture
+# 📸 Automatic Live Stream Thumbnail Capture
 
 ## Overview
 
-The platform automatically captures animated 3-second video clips from live streams to use as thumbnails. This makes live streams more engaging and helps viewers see what's happening before they join.
+The platform automatically captures static image thumbnails from live streams. This creates professional-looking thumbnails that help viewers see what's happening before they join, while keeping storage and bandwidth usage minimal.
 
 ---
 
@@ -14,18 +14,18 @@ The platform automatically captures animated 3-second video clips from live stre
 
 ### 2. **Auto-Capture After 2 Minutes**
 - After streaming for **2 minutes**, the system automatically:
-  - Records a **3-second video clip** from the live stream
+  - Captures a **single frame snapshot** (JPEG image) from the live stream
   - Uploads it to Supabase Storage (`stream-recordings/thumbnails/`)
   - Updates the stream record with the new thumbnail URL
 
 ### 3. **Thumbnail Display**
-- The animated clip **replaces** the placeholder
+- The captured image **replaces** the placeholder
 - Displays on:
   - Homepage (Live Now section)
   - Discover page (All live streams)
   - Stream cards everywhere
-- Video loops automatically
-- Muted by default (sound on hover could be added later)
+- Static image - fast loading, minimal bandwidth
+- Scales smoothly on hover for visual feedback
 
 ---
 
@@ -34,7 +34,7 @@ The platform automatically captures animated 3-second video clips from live stre
 ### Files Modified
 
 1. **`lib/thumbnail.ts`** (NEW)
-   - `captureLiveStreamThumbnail()` - Captures 3-second video clip
+   - `captureLiveStreamThumbnail()` - Captures single frame as JPEG
    - `scheduleAutomaticThumbnailCapture()` - Schedules capture after X minutes
 
 2. **`components/LiveKitGoLive.tsx`**
@@ -43,9 +43,9 @@ The platform automatically captures animated 3-second video clips from live stre
    - Triggers after 2 minutes of streaming
 
 3. **`components/StreamCard.tsx`**
-   - Detects `.webm` thumbnail URLs
-   - Renders `<video>` element for animated thumbnails
-   - Fallback to static image or placeholder
+   - Displays thumbnail images
+   - Smooth scaling on hover for visual feedback
+   - Fallback to placeholder if no thumbnail
 
 4. **`supabase-thumbnail-storage.sql`** (NEW)
    - Storage policies for thumbnail uploads
@@ -56,7 +56,7 @@ The platform automatically captures animated 3-second video clips from live stre
 ```
 stream-recordings/
 ├── thumbnails/
-│   ├── thumbnail_STREAM_ID_TIMESTAMP.webm  (3-second clips)
+│   ├── thumbnail_STREAM_ID_TIMESTAMP.jpg  (static images)
 │   └── ...
 └── recordings/
     ├── STREAM_ID.webm  (full recordings)
@@ -81,30 +81,25 @@ thumbnailTimerRef.current = scheduleAutomaticThumbnailCapture(
 );
 ```
 
-### Clip Duration
+### Image Quality
 
-Default: **3 seconds** at 30fps
+Default: **85% JPEG quality**, 1280x720 resolution
 
-To change this, edit `lib/thumbnail.ts`:
+To change quality, edit `lib/thumbnail.ts`:
 
 ```typescript
-const maxFrames = 30 * 3 // 30fps * seconds
+canvas.toBlob(
+  (blob) => resolve(blob),
+  'image/jpeg',
+  0.85 // Change this (0.0 to 1.0, higher = better quality)
+)
 ```
 
-### Video Quality
-
-Default: **2.5 Mbps** bitrate, 1280x720 resolution
-
-To change this, edit `lib/thumbnail.ts`:
+To change resolution, edit `lib/thumbnail.ts`:
 
 ```typescript
-const recorder = new MediaRecorder(canvasStream, {
-  mimeType: 'video/webm;codecs=vp9',
-  videoBitsPerSecond: 2500000, // Change this (bits per second)
-})
-
-canvas.width = 1280  // Change resolution
-canvas.height = 720
+canvas.width = 1280  // Change width
+canvas.height = 720  // Change height
 ```
 
 ---
@@ -113,7 +108,8 @@ canvas.height = 720
 
 ### File Sizes
 
-- **3-second clip** at 2.5 Mbps ≈ **900 KB per thumbnail**
+- **Static JPEG** at 85% quality ≈ **100-200 KB per thumbnail**
+- 10x smaller than video clips
 - Much smaller than full recordings
 - Automatically overwrites if stream restarts
 
