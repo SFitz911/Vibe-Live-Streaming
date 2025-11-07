@@ -65,13 +65,17 @@ export default function StreamCard({ stream }: StreamCardProps) {
           {stream.thumbnail_url ? (
             // Check if it's a video thumbnail (.webm) or static image
             stream.thumbnail_url.endsWith('.webm') ? (
-              // Auto-captured animated thumbnail (3-second video clip)
+              // Auto-captured animated thumbnail (15-second video clip)
               <video
                 src={stream.thumbnail_url}
                 autoPlay
                 loop
                 muted
                 playsInline
+                onLoadedMetadata={(e) => {
+                  // Explicitly play to ensure autoplay works
+                  (e.target as HTMLVideoElement).play().catch(err => console.log('Autoplay prevented:', err))
+                }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             ) : (
