@@ -605,7 +605,7 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
             >
                 <video
                     ref={(videoEl) => {
-                        if (videoEl && activeTrack.publication.track) {
+                        if (videoEl && activeTrack.publication?.track) {
                             activeTrack.publication.track.attach(videoEl);
                             // Also store in videoRef for thumbnail capture
                             (videoRef as any).current = videoEl;
@@ -696,6 +696,18 @@ function LiveKitControls({ onLeave }: { onLeave: () => void }) {
         const timer = setTimeout(() => {
             if (!camera.enabled) {
                 camera.toggle();
+            }
+        }, 1000); // Wait 1 second for connection to stabilize
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Auto-enable microphone after connection is established
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!microphone.enabled) {
+                console.log('🎤 Auto-enabling microphone for recording...');
+                microphone.toggle();
             }
         }, 1000); // Wait 1 second for connection to stabilize
 
