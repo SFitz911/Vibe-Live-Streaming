@@ -337,6 +337,8 @@ function RecordingManager({
                 
                 if (activeVideoTrack && activeVideoTrack.track) {
                     console.log(`📹 Recording video from: ${activeVideoTrack.source}`);
+                    console.log(`   Track ID: ${activeVideoTrack.track.mediaStreamTrack.id}`);
+                    console.log(`   Track state: ${activeVideoTrack.track.mediaStreamTrack.readyState}`);
                     stream.addTrack(activeVideoTrack.track.mediaStreamTrack);
                 } else {
                     console.log('⚠️ No video track found');
@@ -384,25 +386,38 @@ function RecordingManager({
                 const videoTracks = stream.getVideoTracks();
                 const audioTracks = stream.getAudioTracks();
                 console.log(`✅ Recording started successfully! Capturing ${videoTracks.length} video track(s) and ${audioTracks.length} audio track(s)`);
+                
+                // Verify recording actually started
+                if (recorder.state === 'recording') {
+                    console.log('✅ MediaRecorder state confirmed: recording');
+                } else {
+                    console.error('❌ MediaRecorder failed to start! State:', recorder.state);
+                }
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         };
 
         // Listen for track published events (like screen share)
-        const handleTrackPublished = () => {
-            console.log('🔄 New track published, restarting recording to capture it...');
+        const handleTrackPublished = (publication: any) => {
+            console.log('🔄 New track published:', publication.source, '- restarting recording to capture it...');
             
             // Stop current recording (preserves chunks)
             if (currentRecorder && currentRecorder.state !== 'inactive') {
+                console.log('⏹️ Stopping current recording to switch tracks...');
                 currentRecorder.stop();
             }
             
             // Reset attempts counter for fresh start
             attempts = 0;
             
-            // Restart recording after a delay to ensure new track is fully ready
-            setTimeout(startRecording, 1500);
+            // Restart recording after a longer delay to ensure new track is fully ready
+            // Increased from 1500ms to 2500ms for more reliable track switching
+            console.log('⏳ Waiting 2.5 seconds for track to be fully ready...');
+            setTimeout(() => {
+                console.log('🔄 Attempting to restart recording with new track...');
+                startRecording();
+            }, 2500);
         };
 
         localParticipant.on('trackPublished', handleTrackPublished);

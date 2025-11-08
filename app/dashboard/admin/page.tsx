@@ -6,7 +6,8 @@ import Navigation from '@/components/Navigation'
 import BackButton from '@/components/BackButton'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
-import { Users, Award, ThumbsUp, Video, TrendingUp, CheckCircle, Search, X } from 'lucide-react'
+import { Users, Award, ThumbsUp, Video, TrendingUp, CheckCircle, Search, X, Settings } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -298,9 +299,20 @@ export default function AdminPage() {
               Admin Dashboard
             </h1>
           </div>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-lg mb-4">
             Manage users, projects, and track platform analytics
           </p>
+          
+          {/* App Settings Button */}
+          <div className="flex justify-center">
+            <Link
+              href="/admin/settings"
+              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70"
+            >
+              <Settings className="h-5 w-5" />
+              <span>App Settings</span>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Grid */}

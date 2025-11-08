@@ -20,11 +20,26 @@ export default function StreamCard({ stream }: StreamCardProps) {
   const { user } = useAuth()
   const [streamerLevel, setStreamerLevel] = useState({ level: 1, totalPoints: 0 })
   const [likeCount, setLikeCount] = useState(0)
+  const [thumbnailMode, setThumbnailMode] = useState<'frozen' | 'hover' | '12s' | '30s'>('hover')
+  const [isHovering, setIsHovering] = useState(false)
   
   // Check if stream is recently live (ended but still showing in Live Now)
   const isRecentlyLive = !stream.is_live && stream.recently_live_until && new Date(stream.recently_live_until) > new Date()
 
   useEffect(() => {
+    // Fetch thumbnail mode setting
+    const fetchThumbnailMode = async () => {
+      try {
+        const response = await fetch('/api/admin/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setThumbnailMode(data.thumbnail_mode || 'hover')
+        }
+      } catch (error) {
+        console.error('Failed to fetch thumbnail mode:', error)
+      }
+    }
+
     // Fetch streamer's total stats to calculate level
     const fetchStreamerLevel = async () => {
       if (stream.user_id) {
@@ -39,6 +54,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
       }
     }
 
+    fetchThumbnailMode()
     fetchStreamerLevel()
   }, [stream.user_id])
 
@@ -56,56 +72,167 @@ export default function StreamCard({ stream }: StreamCardProps) {
     fetchLikeCount()
   }, [stream.id])
 
+  // Determine which media to display based on source type and mode
+  const renderThumbnail = () => {
+    // If stream is currently live, always show live placeholder
+    if (stream.is_live) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-black">
+          <div className="text-center">
+            <h2 className="text-2xl font-light text-white">Nextwork.org</h2>
+            <p className="text-lg font-light text-gray-300 mt-1">Classroom</p>
+          </div>
+        </div>
+      )
+    }
+
+    // YouTube streams - always frozen (static thumbnail)
+    if ((stream as any).source_type === 'youtube' || stream.thumbnail_url?.includes('youtube') || stream.thumbnail_url?.includes('youtu.be')) {
+      return (
+        <img
+          src={stream.thumbnail_url || '/placeholder-thumbnail.jpg'}
+          alt={stream.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      )
+    }
+
+    // Live event streams - respect thumbnail mode
+    if ((stream as any).source_type === 'live_event' || !(stream as any).source_type) {
+      const video_30s_url = (stream as any).video_30s_url
+      const video_12s_url = (stream as any).video_12s_url
+      const thumbnail_frozen_url = (stream as any).thumbnail_frozen_url || stream.thumbnail_url
+
+      switch (thumbnailMode) {
+        case 'frozen':
+          // Static image only
+          return (
+            <img
+              src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+              alt={stream.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          )
+
+        case 'hover':
+          // Static image, video plays on hover
+          if (video_12s_url) {
+            return (
+              <div className="relative w-full h-full">
+                {!isHovering && (
+                  <img
+                    src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+                    alt={stream.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 absolute inset-0"
+                  />
+                )}
+                <video
+                  src={video_12s_url}
+                  loop
+                  muted
+                  playsInline
+                  className={`w-full h-full object-cover ${isHovering ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+                  onMouseEnter={() => setIsHovering(true)}
+                  onMouseLeave={() => setIsHovering(false)}
+                  autoPlay={isHovering}
+                />
+              </div>
+            )
+          }
+          // Fallback to frozen if no 12s video
+          return (
+            <img
+              src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+              alt={stream.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          )
+
+        case '12s':
+          // Auto-playing 12s video
+          if (video_12s_url) {
+            return (
+              <video
+                src={video_12s_url}
+                loop
+                muted
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            )
+          }
+          // Fallback to frozen if no 12s video
+          return (
+            <img
+              src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+              alt={stream.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          )
+
+        case '30s':
+          // Auto-playing 30s video
+          if (video_30s_url) {
+            return (
+              <video
+                src={video_30s_url}
+                loop
+                muted
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            )
+          }
+          // Fallback to frozen if no 30s video
+          return (
+            <img
+              src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+              alt={stream.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          )
+
+        default:
+          return (
+            <img
+              src={thumbnail_frozen_url || '/placeholder-thumbnail.jpg'}
+              alt={stream.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          )
+      }
+    }
+
+    // Fallback for streams without proper configuration
+    if (stream.thumbnail_url) {
+      return (
+        <img
+          src={stream.thumbnail_url}
+          alt={stream.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      )
+    }
+
+    // No thumbnail available
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+        <div className="text-center">
+          <Play className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No thumbnail</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Link href={`/stream/${stream.id}`} className="group">
       <div className="stream-card card overflow-hidden">
         {/* Thumbnail */}
         <div className="relative aspect-video bg-muted overflow-hidden">
-          {/* Thumbnail Display Logic */}
-          {stream.thumbnail_url ? (
-            // Check if it's a video thumbnail (.webm) or static image
-            stream.thumbnail_url.endsWith('.webm') ? (
-              // Video thumbnail - plays ONLY on hover, paused by default
-              <video
-                src={stream.thumbnail_url}
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                onMouseEnter={(e) => {
-                  e.currentTarget.play().catch(err => console.log('Play prevented:', err))
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.pause()
-                  e.currentTarget.currentTime = 0 // Reset to start
-                }}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-              />
-            ) : (
-              // Static image thumbnail (YouTube or uploaded)
-              <img
-                src={stream.thumbnail_url}
-                alt={stream.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            )
-          ) : stream.is_live ? (
-            // Live stream without captured thumbnail yet - show placeholder
-            <div className="w-full h-full flex items-center justify-center bg-black">
-              <div className="text-center">
-                <h2 className="text-2xl font-light text-white">Nextwork.org</h2>
-                <p className="text-lg font-light text-gray-300 mt-1">Classroom</p>
-              </div>
-            </div>
-          ) : (
-            // No thumbnail available for recorded stream
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-              <div className="text-center">
-                <Play className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No thumbnail</p>
-              </div>
-            </div>
-          )}
+          {renderThumbnail()}
           
           {/* Live Badge */}
           {stream.is_live ? (
