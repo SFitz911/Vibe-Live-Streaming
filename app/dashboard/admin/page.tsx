@@ -6,7 +6,7 @@ import Navigation from '@/components/Navigation'
 import BackButton from '@/components/BackButton'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
-import { Users, Award, ThumbsUp, Video, TrendingUp, CheckCircle, Search, X, Settings } from 'lucide-react'
+import { Users, Award, ThumbsUp, Video, TrendingUp, CheckCircle, Search, X, Settings, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
