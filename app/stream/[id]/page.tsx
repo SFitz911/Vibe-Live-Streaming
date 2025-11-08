@@ -7,6 +7,7 @@ import VideoPlayer from '@/components/VideoPlayer'
 import ChatBox from '@/components/ChatBox'
 import StreamManager from '@/components/StreamManager'
 import LiveKitGoLive from '@/components/LiveKitGoLive'
+import ExpertHelpNotification from '@/components/ExpertHelpNotification'
 import { formatViewerCount, timeAgo } from '@/lib/utils'
 import { Eye, Heart, Share2, User, ChevronDown, Mail } from 'lucide-react'
 import { notFound, useRouter } from 'next/navigation'
@@ -313,6 +314,7 @@ export default function StreamPage({
   return (
     <main className="min-h-screen bg-gray-950">
       <Navigation />
+      <ExpertHelpNotification isEnabled={true} />
 
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
