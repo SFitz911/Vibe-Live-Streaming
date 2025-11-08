@@ -303,7 +303,7 @@ function RecordingManager({
     recordedChunksRef: React.MutableRefObject<Blob[]>;
 }) {
     const { localParticipant } = useLocalParticipant();
-    const [currentTrackSource, setCurrentTrackSource] = useState<'camera' | 'screen_share' | null>(null);
+    const currentTrackSourceRef = useRef<'camera' | 'screen_share' | null>(null);
 
     useEffect(() => {
         if (!localParticipant) return;
@@ -342,11 +342,11 @@ function RecordingManager({
                     console.log(`   Track state: ${activeVideoTrack.track.mediaStreamTrack.readyState}`);
                     stream.addTrack(activeVideoTrack.track.mediaStreamTrack);
                     
-                    // Track which source we're recording from
-                    setCurrentTrackSource(activeVideoTrack.source as 'camera' | 'screen_share');
+                    // Track which source we're recording from (use ref to avoid stale closures)
+                    currentTrackSourceRef.current = activeVideoTrack.source as 'camera' | 'screen_share';
                 } else {
                     console.log('⚠️ No video track found');
-                    setCurrentTrackSource(null);
+                    currentTrackSourceRef.current = null;
                 }
 
                 if (stream.getTracks().length === 0) {
@@ -414,8 +414,8 @@ function RecordingManager({
             const desiredSource = hasScreenShare ? 'screen_share' : (hasCamera ? 'camera' : null);
             
             // If the desired source is different from what we're currently recording, switch!
-            if (desiredSource && desiredSource !== currentTrackSource && currentRecorder) {
-                console.log(`🔄 Track change detected! Switching from ${currentTrackSource} to ${desiredSource}`);
+            if (desiredSource && desiredSource !== currentTrackSourceRef.current && currentRecorder) {
+                console.log(`🔄 Track change detected! Switching from ${currentTrackSourceRef.current} to ${desiredSource}`);
                 console.log('⏹️ Stopping current recording to switch tracks...');
                 
                 if (currentRecorder.state !== 'inactive') {
