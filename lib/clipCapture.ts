@@ -61,7 +61,7 @@ export async function captureVideoClip(
 /**
  * Captures a frozen frame (thumbnail) from video element
  */
-export function captureFrozenFrame(videoElement: HTMLVideoElement): Blob | null {
+export async function captureFrozenFrame(videoElement: HTMLVideoElement): Promise<Blob | null> {
   try {
     const canvas = document.createElement('canvas');
     canvas.width = videoElement.videoWidth || 1280;
@@ -76,7 +76,7 @@ export function captureFrozenFrame(videoElement: HTMLVideoElement): Blob | null 
     // Draw current video frame
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-    // Convert to blob
+    // Convert to blob (async)
     return new Promise<Blob | null>((resolve) => {
       canvas.toBlob(
         (blob) => {
@@ -85,7 +85,7 @@ export function captureFrozenFrame(videoElement: HTMLVideoElement): Blob | null 
         'image/jpeg',
         0.85 // Quality: 85%
       );
-    }) as any;
+    });
 
   } catch (error) {
     console.error('Error capturing frozen frame:', error);
@@ -103,13 +103,13 @@ export async function captureAllClips(
   console.log('🎬 Starting clip capture...');
 
   try {
-    // Capture frozen frame immediately
-    const thumbnailBlob = captureFrozenFrame(videoElement);
+    // Capture frozen frame immediately (await the promise)
+    const thumbnailBlob = await captureFrozenFrame(videoElement);
     
     if (!thumbnailBlob) {
       console.error('Failed to capture thumbnail');
     } else {
-      console.log('✅ Thumbnail captured:', Math.round((thumbnailBlob as any).size / 1024), 'KB');
+      console.log('✅ Thumbnail captured:', Math.round(thumbnailBlob.size / 1024), 'KB');
     }
 
     // Start both video captures simultaneously
@@ -135,7 +135,7 @@ export async function captureAllClips(
     return {
       clip30s: clip30sBlob,
       clip12s: clip12sBlob,
-      thumbnail: thumbnailBlob as any,
+      thumbnail: thumbnailBlob,
     };
 
   } catch (error) {
