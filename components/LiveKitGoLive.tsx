@@ -303,6 +303,7 @@ function RecordingManager({
     recordedChunksRef: React.MutableRefObject<Blob[]>;
 }) {
     const { localParticipant } = useLocalParticipant();
+    const [currentTrackSource, setCurrentTrackSource] = useState<'camera' | 'screen_share' | null>(null);
 
     useEffect(() => {
         if (!localParticipant) return;
@@ -340,8 +341,12 @@ function RecordingManager({
                     console.log(`   Track ID: ${activeVideoTrack.track.mediaStreamTrack.id}`);
                     console.log(`   Track state: ${activeVideoTrack.track.mediaStreamTrack.readyState}`);
                     stream.addTrack(activeVideoTrack.track.mediaStreamTrack);
+                    
+                    // Track which source we're recording from
+                    setCurrentTrackSource(activeVideoTrack.source as 'camera' | 'screen_share');
                 } else {
                     console.log('⚠️ No video track found');
+                    setCurrentTrackSource(null);
                 }
 
                 if (stream.getTracks().length === 0) {
@@ -398,36 +403,41 @@ function RecordingManager({
             }
         };
 
-        // Listen for track published events (like screen share)
-        const handleTrackPublished = (publication: any) => {
-            console.log('🔄 New track published:', publication.source, '- restarting recording to capture it...');
+        // Monitor for track changes (screen share start/stop)
+        const checkIntervalId = setInterval(() => {
+            const hasScreenShare = Array.from(localParticipant.videoTrackPublications.values())
+                .some(pub => pub.source === 'screen_share' && pub.track);
             
-            // Stop current recording (preserves chunks)
-            if (currentRecorder && currentRecorder.state !== 'inactive') {
+            const hasCamera = Array.from(localParticipant.videoTrackPublications.values())
+                .some(pub => pub.source === 'camera' && pub.track);
+            
+            const desiredSource = hasScreenShare ? 'screen_share' : (hasCamera ? 'camera' : null);
+            
+            // If the desired source is different from what we're currently recording, switch!
+            if (desiredSource && desiredSource !== currentTrackSource && currentRecorder) {
+                console.log(`🔄 Track change detected! Switching from ${currentTrackSource} to ${desiredSource}`);
                 console.log('⏹️ Stopping current recording to switch tracks...');
-                currentRecorder.stop();
+                
+                if (currentRecorder.state !== 'inactive') {
+                    currentRecorder.stop();
+                }
+                
+                attempts = 0;
+                
+                console.log('⏳ Waiting 2.5 seconds for new track to be fully ready...');
+                setTimeout(() => {
+                    console.log(`🔄 Attempting to restart recording with ${desiredSource}...`);
+                    startRecording();
+                }, 2500);
             }
-            
-            // Reset attempts counter for fresh start
-            attempts = 0;
-            
-            // Restart recording after a longer delay to ensure new track is fully ready
-            // Increased from 1500ms to 2500ms for more reliable track switching
-            console.log('⏳ Waiting 2.5 seconds for track to be fully ready...');
-            setTimeout(() => {
-                console.log('🔄 Attempting to restart recording with new track...');
-                startRecording();
-            }, 2500);
-        };
-
-        localParticipant.on('trackPublished', handleTrackPublished);
+        }, 1000); // Check every second for track changes
 
         // Small delay to ensure tracks are published, then start trying
         timeoutId = setTimeout(startRecording, 1000);
 
         return () => {
             clearTimeout(timeoutId);
-            localParticipant.off('trackPublished', handleTrackPublished);
+            clearInterval(checkIntervalId);
             if (currentRecorder && currentRecorder.state !== 'inactive') {
                 currentRecorder.stop();
             }
