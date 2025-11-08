@@ -15,11 +15,72 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
   const [loading, setLoading] = useState(false)
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium')
 
+  // Play the alert sound for both sender and receiver
+  const playAlertSound = (urgency: 'low' | 'medium' | 'high') => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const now = audioContext.currentTime
+
+      // Different urgency levels have different sound repetitions
+      const repeatCount = urgency === 'high' ? 6 : urgency === 'medium' ? 4 : 2
+
+      for (let i = 0; i < repeatCount; i++) {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.type = 'sawtooth' // Classic submarine alarm sound
+        
+        const startTime = now + (i * 0.4)
+        const duration = 0.3
+
+        // Submarine dive: sweep from high to low frequency
+        oscillator.frequency.setValueAtTime(800, startTime)
+        oscillator.frequency.exponentialRampToValueAtTime(400, startTime + duration)
+
+        // Volume envelope - fade in and out for "woop" effect
+        gainNode.gain.setValueAtTime(0, startTime)
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05)
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + duration - 0.1)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+
+        oscillator.start(startTime)
+        oscillator.stop(startTime + duration)
+      }
+
+      // Add a second layer for more depth (submarine sonar ping effect)
+      if (urgency === 'high') {
+        const pingOscillator = audioContext.createOscillator()
+        const pingGain = audioContext.createGain()
+        
+        pingOscillator.connect(pingGain)
+        pingGain.connect(audioContext.destination)
+        
+        pingOscillator.type = 'sine'
+        pingOscillator.frequency.value = 200
+        
+        const pingStart = now + (repeatCount * 0.4)
+        pingGain.gain.setValueAtTime(0.15, pingStart)
+        pingGain.gain.exponentialRampToValueAtTime(0.01, pingStart + 0.3)
+        
+        pingOscillator.start(pingStart)
+        pingOscillator.stop(pingStart + 0.3)
+      }
+    } catch (error) {
+      console.error('Audio playback failed:', error)
+    }
+  }
+
   const triggerTestExpertNotification = async () => {
     if (!user) {
       alert('Please log in to send messages')
       return
     }
+
+    // Play sound immediately for the SENDER
+    playAlertSound(urgency)
 
     setLoading(true)
     
@@ -56,7 +117,7 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
 
       if (error) throw error
 
-      // Also dispatch event for legacy notification system
+      // Also dispatch event for notification system (so RECEIVERS hear it too)
       const event = new CustomEvent('expertHelpRequest', {
         detail: {
           id: `help-${Date.now()}`,
