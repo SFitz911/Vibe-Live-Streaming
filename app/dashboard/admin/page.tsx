@@ -358,65 +358,29 @@ export default function AdminPage() {
               Mark Project Complete
             </h2>
 
-            {/* User Search with Autocomplete */}
-            <div className="mb-4 relative user-search-container">
+            {/* User Selection Dropdown */}
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Select User
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchEmail}
-                  onChange={(e) => {
-                    setSearchEmail(e.target.value)
-                    setShowDropdown(true)
-                    if (selectedUser && e.target.value !== (selectedUser.display_name || selectedUser.username)) {
-                      setSelectedUser(null) // Clear selection if typing
-                    }
-                  }}
-                  onFocus={() => setShowDropdown(true)}
-                  onClick={() => setShowDropdown(true)}
-                  placeholder="Click to see all users or type to search..."
-                  className="w-full px-4 py-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 pr-10 cursor-pointer"
-                />
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
-              </div>
-
-              {/* Autocomplete Dropdown */}
-              {showDropdown && filteredUsers.length > 0 && !selectedUser && (
-                <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-yellow-500 rounded-lg shadow-2xl max-h-80 overflow-y-auto">
-                  <div className="sticky top-0 bg-gray-700 px-4 py-2 border-b border-gray-600">
-                    <p className="text-xs text-gray-300 font-semibold">
-                      {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} found
-                    </p>
-                  </div>
-                  {filteredUsers.map((user) => (
-                    <button
-                      key={user.id}
-                      onClick={() => handleSelectUser(user.id)}
-                      className="w-full px-4 py-3 text-left hover:bg-yellow-600/20 hover:border-l-4 hover:border-yellow-500 transition-all border-b border-gray-700 last:border-b-0"
-                    >
-                      <div className="flex items-center space-x-3">
-                        {user.avatar_url ? (
-                          <img src={user.avatar_url} alt="" className="w-10 h-10 rounded-full border-2 border-gray-600" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-sm font-bold border-2 border-gray-600">
-                            {(user.display_name || user.username)?.[0]?.toUpperCase()}
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium text-sm truncate">
-                            {user.display_name || user.username}
-                          </p>
-                          <p className="text-gray-400 text-xs truncate">
-                            @{user.username}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <select
+                value={selectedUser?.id || ''}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleSelectUser(e.target.value)
+                  } else {
+                    setSelectedUser(null)
+                  }
+                }}
+                className="w-full px-4 py-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer"
+              >
+                <option value="">Select a learner...</option>
+                {allUsers.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.display_name || user.username} (@{user.username})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Selected User Info */}
