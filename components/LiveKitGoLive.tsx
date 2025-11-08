@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { LiveKitRoom, useTrackToggle, RoomAudioRenderer, useTracks, useLocalParticipant } from "@livekit/components-react";
 import { Track } from "livekit-client";
-import { scheduleAutomaticThumbnailCapture } from "@/lib/thumbnail";
+import { captureAllClips, uploadClips } from "@/lib/clipCapture";
 import { supabase } from "@/lib/supabase";
 
 // Utility to fetch a LiveKit token from your backend
@@ -466,22 +466,57 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
     const activeTrack = screenShareTrack || cameraTrack;
     const isScreenShare = !!screenShareTrack;
 
-    // Schedule automatic thumbnail capture after 2 minutes of streaming
+    // Schedule automatic clip capture at 20-second mark
     useEffect(() => {
-        if (videoRef.current && streamId && activeTrack) {
+        if (videoRef.current && streamId && activeTrack && localParticipant) {
             // Clear any existing timer
             if (thumbnailTimerRef.current) {
                 clearTimeout(thumbnailTimerRef.current);
             }
 
-            // Schedule thumbnail capture (5 seconds after going live)
-            thumbnailTimerRef.current = scheduleAutomaticThumbnailCapture(
-                videoRef.current,
-                streamId,
-                0.083 // Capture after 5 seconds (0.083 minutes)
-            );
+            // Schedule clip capture after 20 seconds
+            thumbnailTimerRef.current = setTimeout(async () => {
+                console.log('🎬 20-second mark reached! Capturing clips...');
+                
+                try {
+                    // Get the MediaStream from local participant
+                    const stream = new MediaStream();
+                    
+                    // Add video track
+                    if (activeTrack.publication.track) {
+                        stream.addTrack(activeTrack.publication.track.mediaStreamTrack);
+                    }
+                    
+                    // Add audio tracks
+                    localParticipant.audioTrackPublications.forEach((pub) => {
+                        if (pub.track) {
+                            stream.addTrack(pub.track.mediaStreamTrack);
+                        }
+                    });
 
-            console.log('🎬 Auto-thumbnail scheduled for 5 seconds from now...');
+                    if (stream.getTracks().length === 0) {
+                        console.error('❌ No tracks available for clip capture');
+                        return;
+                    }
+
+                    // Capture all three clips
+                    const clips = await captureAllClips(stream, videoRef.current!);
+                    
+                    // Upload clips to server
+                    const success = await uploadClips(streamId, clips);
+                    
+                    if (success) {
+                        console.log('✅ All clips captured and uploaded successfully!');
+                    } else {
+                        console.error('❌ Failed to upload clips');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error during clip capture:', error);
+                }
+            }, 20000); // 20 seconds
+
+            console.log('⏱️ Clip capture scheduled for 20 seconds from now...');
         }
 
         // Cleanup timer on unmount
@@ -490,7 +525,7 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
                 clearTimeout(thumbnailTimerRef.current);
             }
         };
-    }, [streamId, activeTrack]);
+    }, [streamId, activeTrack, localParticipant]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (zoom > 1 && isScreenShare) {
