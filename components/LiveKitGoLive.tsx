@@ -445,6 +445,7 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const videoRef = useRef<HTMLVideoElement>(null);
     const thumbnailTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const captureAttemptedRef = useRef<boolean>(false); // Prevent multiple captures
     
     const tracks = useTracks([
         { source: Track.Source.ScreenShare, withPlaceholder: false },
@@ -468,23 +469,25 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
 
     // Schedule automatic clip capture at 20-second mark
     useEffect(() => {
-        if (videoRef.current && streamId && activeTrack && localParticipant) {
-            // Clear any existing timer
-            if (thumbnailTimerRef.current) {
-                clearTimeout(thumbnailTimerRef.current);
-            }
-
+        // Only schedule if we have everything we need AND haven't attempted capture yet
+        if (videoRef.current && streamId && activeTrack && localParticipant && !captureAttemptedRef.current) {
+            
+            captureAttemptedRef.current = true; // Mark that we're attempting capture
+            
             // Schedule clip capture after 20 seconds
             thumbnailTimerRef.current = setTimeout(async () => {
                 console.log('🎬 20-second mark reached! Capturing clips...');
                 
                 try {
-                    // Get the MediaStream from local participant
+                    // Get the MediaStream from local participant at capture time
                     const stream = new MediaStream();
                     
-                    // Add video track
-                    if (activeTrack.publication.track) {
-                        stream.addTrack(activeTrack.publication.track.mediaStreamTrack);
+                    // Add video track - get fresh reference
+                    const videoTrack = Array.from(localParticipant.videoTrackPublications.values())
+                        .find(pub => (pub.source === 'screen_share' || pub.source === 'camera') && pub.track);
+                    
+                    if (videoTrack?.track) {
+                        stream.addTrack(videoTrack.track.mediaStreamTrack);
                     }
                     
                     // Add audio tracks
@@ -519,13 +522,16 @@ function CustomVideoDisplay({ streamId }: { streamId?: string }) {
             console.log('⏱️ Clip capture scheduled for 20 seconds from now...');
         }
 
-        // Cleanup timer on unmount
+        // Cleanup ONLY on unmount, not on re-renders
         return () => {
-            if (thumbnailTimerRef.current) {
+            // Only clear if component is truly unmounting (streamId becomes null/undefined)
+            if (!streamId && thumbnailTimerRef.current) {
                 clearTimeout(thumbnailTimerRef.current);
+                thumbnailTimerRef.current = null;
+                captureAttemptedRef.current = false;
             }
         };
-    }, [streamId, activeTrack, localParticipant]);
+    }, [streamId, activeTrack, localParticipant]); // Dependencies needed to know when to start
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (zoom > 1 && isScreenShare) {
