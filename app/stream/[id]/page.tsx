@@ -321,7 +321,7 @@ export default function StreamPage({
             {isRecordedStream ? (
               /* Show Video Player for Recorded Streams */
               <div className="w-full">
-                <VideoPlayer playbackUrl={stream.playback_url} isLive={false} autoplay={true} muted={true} />
+                <VideoPlayer playbackUrl={stream.playback_url} isLive={false} autoplay={false} muted={false} />
                 
                 {/* Stream Info Below Video */}
                 <div className="mt-6 bg-gray-900 rounded-xl p-6 border border-gray-800">

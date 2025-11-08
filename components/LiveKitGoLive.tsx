@@ -304,6 +304,8 @@ function RecordingManager({
 }) {
     const { localParticipant } = useLocalParticipant();
     const currentTrackSourceRef = useRef<'camera' | 'screen_share' | null>(null);
+    const lastDetectedSourceRef = useRef<'camera' | 'screen_share' | null>(null);
+    const detectionCountRef = useRef<number>(0);
 
     useEffect(() => {
         if (!localParticipant) return;
@@ -403,7 +405,7 @@ function RecordingManager({
             }
         };
 
-        // Monitor for track changes (screen share start/stop)
+        // Monitor for track changes (screen share start/stop) with debouncing
         const checkIntervalId = setInterval(() => {
             const hasScreenShare = Array.from(localParticipant.videoTrackPublications.values())
                 .some(pub => pub.source === 'screen_share' && pub.track);
@@ -413,8 +415,22 @@ function RecordingManager({
             
             const desiredSource = hasScreenShare ? 'screen_share' : (hasCamera ? 'camera' : null);
             
-            // If the desired source is different from what we're currently recording, switch!
-            if (desiredSource && desiredSource !== currentTrackSourceRef.current && currentRecorder) {
+            // Debounce: Only switch if the desired source has been stable for 3 consecutive checks
+            if (desiredSource === lastDetectedSourceRef.current) {
+                detectionCountRef.current += 1;
+            } else {
+                lastDetectedSourceRef.current = desiredSource;
+                detectionCountRef.current = 1;
+            }
+            
+            // Only switch if we've detected the same source for 3+ consecutive checks (3 seconds)
+            // AND it's different from what we're currently recording
+            if (
+                desiredSource && 
+                desiredSource !== currentTrackSourceRef.current && 
+                detectionCountRef.current >= 3 &&
+                currentRecorder
+            ) {
                 console.log(`🔄 Track change detected! Switching from ${currentTrackSourceRef.current} to ${desiredSource}`);
                 console.log('⏹️ Stopping current recording to switch tracks...');
                 
@@ -423,6 +439,7 @@ function RecordingManager({
                 }
                 
                 attempts = 0;
+                detectionCountRef.current = 0; // Reset counter after switching
                 
                 console.log('⏳ Waiting 2.5 seconds for new track to be fully ready...');
                 setTimeout(() => {
