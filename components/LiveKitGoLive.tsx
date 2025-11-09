@@ -137,10 +137,21 @@ export default function LiveKitGoLive({
         // Stop recording if active and wait for it to finish
         if (mediaRecorder && mediaRecorder.state !== 'inactive' && streamId) {
             console.log('⏹️ Stopping MediaRecorder...');
-            mediaRecorder.stop();
             
-            // Wait a moment for the onstop handler to collect final chunks
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Wait for onstop handler to complete using a Promise
+            await new Promise<void>((resolve) => {
+                const originalOnStop = mediaRecorder.onstop;
+                mediaRecorder.onstop = (event) => {
+                    if (originalOnStop) originalOnStop.call(mediaRecorder, event);
+                    console.log('✅ MediaRecorder onstop handler completed');
+                    resolve();
+                };
+                mediaRecorder.stop();
+            });
+            
+            // Additional wait to ensure file is fully finalized
+            console.log('⏳ Waiting for file finalization...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Get chunks from ref (synchronous access)
             const allChunks = recordedChunksRef.current;
