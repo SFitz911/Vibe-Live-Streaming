@@ -33,6 +33,12 @@ export default function VideoPlayer({
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  // Debug logging
+  console.log('🎬 VideoPlayer received playbackUrl:', playbackUrl)
+  console.log('🎬 URL includes "30s"?', playbackUrl?.includes('30s'))
+  console.log('🎬 URL includes "12s"?', playbackUrl?.includes('12s'))
+  console.log('🎬 URL includes "stream-recordings"?', playbackUrl?.includes('stream-recordings'))
+
   // Check if URL is a YouTube video
   const youtubeVideoId = getYouTubeVideoId(playbackUrl)
 
@@ -58,6 +64,7 @@ export default function VideoPlayer({
 
   // If it's a direct video file, use native video player
   if (isDirectVideo) {
+    console.log('✅ Using native video player for:', playbackUrl)
     return (
       <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
         <video
@@ -69,6 +76,11 @@ export default function VideoPlayer({
           muted={muted}
           playsInline
           crossOrigin="anonymous"
+          onLoadedMetadata={(e) => {
+            const video = e.target as HTMLVideoElement
+            console.log('📹 Video metadata loaded. Duration:', video.duration, 'seconds')
+            console.log('📹 Video size:', video.videoWidth, 'x', video.videoHeight)
+          }}
           onLoadedData={(e) => {
             // Explicitly play to ensure autoplay works
             if (autoplay) {
@@ -76,6 +88,9 @@ export default function VideoPlayer({
                 console.log('Autoplay prevented:', err)
               )
             }
+          }}
+          onEnded={() => {
+            console.log('⏹️ Video playback ended')
           }}
         >
           Your browser does not support the video tag.
