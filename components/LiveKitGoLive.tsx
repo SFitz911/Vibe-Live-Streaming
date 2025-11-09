@@ -374,14 +374,21 @@ function RecordingManager({
                     currentTrackSourceRef.current = null;
                 }
 
-                if (stream.getTracks().length === 0) {
+                // Check if we have BOTH audio and video tracks before starting recording
+                const audioTracks = stream.getAudioTracks();
+                const videoTracks = stream.getVideoTracks();
+                
+                console.log(`🔍 Track check: ${audioTracks.length} audio, ${videoTracks.length} video`);
+                
+                if (audioTracks.length === 0 || videoTracks.length === 0) {
                     attempts++;
                     if (attempts < maxAttempts) {
-                        console.log(`No tracks available for recording yet (attempt ${attempts}/${maxAttempts}), retrying...`);
+                        console.log(`⏳ Waiting for both audio and video tracks (attempt ${attempts}/${maxAttempts}), retrying...`);
                         timeoutId = setTimeout(startRecording, 1000);
                         return;
                     } else {
-                        console.error('Failed to start recording: No tracks available after multiple attempts');
+                        console.error('❌ Failed to start recording: Missing audio or video after multiple attempts');
+                        console.error(`   Audio tracks: ${audioTracks.length}, Video tracks: ${videoTracks.length}`);
                         return;
                     }
                 }
@@ -408,14 +415,22 @@ function RecordingManager({
                     });
                 };
 
+                // Verify we have both tracks before starting
+                const finalVideoTracks = stream.getVideoTracks();
+                const finalAudioTracks = stream.getAudioTracks();
+                
+                if (finalAudioTracks.length === 0 || finalVideoTracks.length === 0) {
+                    console.error('❌ Cannot start recording without both audio and video!');
+                    console.error(`   Audio: ${finalAudioTracks.length}, Video: ${finalVideoTracks.length}`);
+                    return;
+                }
+                
                 // Start recording (collect data every 1 second)
                 recorder.start(1000);
                 setMediaRecorder(recorder);
                 currentRecorder = recorder;
                 
-                const videoTracks = stream.getVideoTracks();
-                const audioTracks = stream.getAudioTracks();
-                console.log(`✅ Recording started successfully! Capturing ${videoTracks.length} video track(s) and ${audioTracks.length} audio track(s)`);
+                console.log(`✅ Recording started successfully! Capturing ${finalVideoTracks.length} video track(s) and ${finalAudioTracks.length} audio track(s)`);
                 
                 // Verify recording actually started
                 if (recorder.state === 'recording') {
@@ -472,8 +487,8 @@ function RecordingManager({
             }
         }, 1000); // Check every second for track changes
 
-        // Small delay to ensure tracks are published, then start trying
-        timeoutId = setTimeout(startRecording, 1000);
+        // Wait 2 seconds to ensure mic and camera are auto-enabled before attempting recording
+        timeoutId = setTimeout(startRecording, 2000);
 
         return () => {
             clearTimeout(timeoutId);
