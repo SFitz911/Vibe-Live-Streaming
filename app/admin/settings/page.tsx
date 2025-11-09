@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import ThumbnailModeSelector from '@/components/admin/ThumbnailModeSelector';
 import CostComparisonTable from '@/components/admin/CostComparisonTable';
 import ResourceMonitor from '@/components/admin/ResourceMonitor';
+import StreamDistribution from '@/components/admin/StreamDistribution';
+import CostReferenceChart from '@/components/admin/CostReferenceChart';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -141,15 +143,27 @@ export default function AdminSettingsPage() {
             currentMode={currentMode}
           />
 
-          {/* Resource Monitor */}
-          <ResourceMonitor
-            autoRefresh={true}
-            refreshInterval={5000}
-          />
+          {/* Two Column Layout for Distribution and Monitor */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Stream Distribution */}
+            <StreamDistribution key={currentMode} />
+
+            {/* Resource Monitor */}
+            <ResourceMonitor
+              autoRefresh={true}
+              refreshInterval={5000}
+              currentMode={currentMode}
+            />
+          </div>
+        </div>
+
+        {/* Cost Reference Chart */}
+        <div className="mt-8">
+          <CostReferenceChart />
         </div>
 
         {/* Footer Info */}
-        <div className="mt-12 p-6 bg-gray-800/50 rounded-lg border border-gray-700">
+        <div className="mt-8 p-6 bg-gray-800/50 rounded-lg border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-3">
             ℹ️ About This Feature
           </h3>

@@ -35,11 +35,13 @@ interface ResourceStats {
 interface ResourceMonitorProps {
   autoRefresh?: boolean;
   refreshInterval?: number; // in milliseconds
+  currentMode?: 'frozen' | 'hover' | '12s' | '30s';
 }
 
 export default function ResourceMonitor({ 
   autoRefresh = true, 
-  refreshInterval = 5000 
+  refreshInterval = 5000,
+  currentMode 
 }: ResourceMonitorProps) {
   const [stats, setStats] = useState<ResourceStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,14 @@ export default function ResourceMonitor({
       }
     };
   }, [autoRefresh, refreshInterval]);
+
+  // Refresh stats when currentMode changes
+  useEffect(() => {
+    if (currentMode) {
+      console.log('Mode changed to:', currentMode, '- Refreshing stats...');
+      fetchStats();
+    }
+  }, [currentMode]);
 
   const getProgressColor = (percentage: number) => {
     if (percentage < 50) return 'bg-green-500';
@@ -120,8 +130,11 @@ export default function ResourceMonitor({
     );
   }
 
-  const storagePercentage = (stats.storage.total_gb / 10) * 100; // Assuming 10GB limit
-  const bandwidthPercentage = (stats.bandwidth.today_gb / 50) * 100; // Assuming 50GB daily target
+  const STORAGE_LIMIT_GB = 100; // Supabase Pro: 100GB storage
+  const BANDWIDTH_DAILY_TARGET_GB = 200; // Supabase Pro: 200GB bandwidth per day
+  
+  const storagePercentage = (stats.storage.total_gb / STORAGE_LIMIT_GB) * 100;
+  const bandwidthPercentage = (stats.bandwidth.today_gb / BANDWIDTH_DAILY_TARGET_GB) * 100;
 
   return (
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
@@ -149,10 +162,10 @@ export default function ResourceMonitor({
       <div className="mb-6 p-4 bg-purple-900/30 rounded-lg border border-purple-700/50">
         <p className="text-sm text-gray-400 mb-1">Current Mode</p>
         <p className="text-2xl font-bold text-purple-300">
-          {stats.cost.current_mode === 'frozen' && '🖼️ Thumbnail Frozen'}
-          {stats.cost.current_mode === 'hover' && '🎬 Thumbnail Hover Only'}
-          {stats.cost.current_mode === '12s' && '⏱️ Thumbnail 12 Seconds'}
-          {stats.cost.current_mode === '30s' && '🎥 Thumbnail 30 Seconds'}
+          {(currentMode || stats.cost.current_mode) === 'frozen' && '🖼️ Thumbnail Frozen'}
+          {(currentMode || stats.cost.current_mode) === 'hover' && '🎬 Thumbnail Hover Only'}
+          {(currentMode || stats.cost.current_mode) === '12s' && '⏱️ Thumbnail 12 Seconds'}
+          {(currentMode || stats.cost.current_mode) === '30s' && '🎥 Thumbnail 30 Seconds'}
         </p>
       </div>
 
@@ -182,9 +195,14 @@ export default function ResourceMonitor({
       {/* Storage Usage */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-300">Storage Usage</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-300">Storage Usage</h3>
+            <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full">
+              PRO
+            </span>
+          </div>
           <span className="text-sm font-semibold text-gray-300">
-            {stats.storage.total_gb.toFixed(2)} GB / 10 GB
+            {stats.storage.total_gb.toFixed(2)} GB / {STORAGE_LIMIT_GB} GB
           </span>
         </div>
         <div className="w-full bg-gray-700 rounded-full h-6 overflow-hidden">

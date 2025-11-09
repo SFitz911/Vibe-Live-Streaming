@@ -69,11 +69,20 @@ export default function AdminPage() {
 
   const fetchAllData = async () => {
     // Fetch all users for autocomplete
-    const { data: usersData } = await supabase
+    console.log('🔍 Fetching users from profiles table...')
+    const { data: usersData, error: usersError } = await supabase
       .from('profiles')
-      .select('id, username, display_name, email, avatar_url')
-      .order('username')
-    setAllUsers(usersData || [])
+      .select('*')  // Fetch all columns to avoid missing column errors
+      .order('username', { ascending: true, nullsFirst: false })
+    
+    if (usersError) {
+      console.error('❌ Error fetching users:', usersError)
+      alert(`Error loading users: ${usersError.message}`)
+    } else {
+      console.log('✅ Fetched users successfully:', usersData?.length || 0, 'users')
+      console.log('👤 Sample user:', usersData?.[0])
+      setAllUsers(usersData || [])
+    }
 
     // Fetch stats
     const { count: userCount } = await supabase
@@ -184,7 +193,7 @@ export default function AdminPage() {
       u.display_name?.toLowerCase().includes(searchTerm) ||
       u.email?.toLowerCase().includes(searchTerm)
     )
-  }).slice(0, 20) // Limit to 20 results for better visibility
+  }) // Show all filtered results
 
   const handleSelectUser = async (userId: string) => {
     // Fetch full user data with related records
@@ -208,7 +217,7 @@ export default function AdminPage() {
     }
 
     setSelectedUser(profileData)
-    setSearchEmail(profileData.display_name || profileData.username || '')
+    setSearchEmail('') // Clear search so dropdown can show all users next time
     setShowDropdown(false)
   }
 
@@ -358,29 +367,124 @@ export default function AdminPage() {
               Mark Project Complete
             </h2>
 
-            {/* User Selection Dropdown */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Select User
-              </label>
-              <select
-                value={selectedUser?.id || ''}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleSelectUser(e.target.value)
-                  } else {
-                    setSelectedUser(null)
-                  }
-                }}
-                className="w-full px-4 py-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer"
-              >
-                <option value="">Select a learner...</option>
-                {allUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.display_name || user.username} (@{user.username})
-                  </option>
-                ))}
-              </select>
+            {/* User Search and Selection */}
+            <div className="mb-4 user-search-container relative">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Select Learner {allUsers.length > 0 && <span className="text-gray-500 text-xs">({allUsers.length} loaded)</span>}
+                </label>
+                <button
+                  onClick={async () => {
+                    console.log('Refreshing users list...')
+                    await fetchAllData()
+                  }}
+                  className="text-xs text-blue-400 hover:text-blue-300 underline"
+                >
+                  🔄 Refresh List
+                </button>
+              </div>
+              
+              {/* Search Input with Clear Button */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchEmail}
+                  onChange={(e) => {
+                    setSearchEmail(e.target.value)
+                    setShowDropdown(true)
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder={`Search ${allUsers.length} learners by username, name, or email...`}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  className="w-full px-4 py-3 pr-20 bg-gray-800 border-2 border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                />
+                {searchEmail && (
+                  <button
+                    onClick={() => {
+                      setSearchEmail('')
+                      setSelectedUser(null)
+                      setShowDropdown(true)
+                    }}
+                    className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+              </div>
+
+              {/* Dropdown Results */}
+              {showDropdown && (
+                <div className="absolute z-50 mt-2 w-full bg-gray-800 border-2 border-yellow-500 rounded-lg shadow-2xl max-h-96 overflow-y-auto">
+                  {filteredUsers.length === 0 && searchEmail.trim() !== '' ? (
+                    /* Only show "no matches" when user is actively searching */
+                    <div className="p-6 text-center text-gray-500">
+                      <Search className="h-16 w-16 mx-auto mb-3 text-gray-600" />
+                      <p className="text-lg font-semibold mb-1">No matches found</p>
+                      <p className="text-sm">No users match "{searchEmail}"</p>
+                      <button
+                        onClick={() => {
+                          setSearchEmail('')
+                          setShowDropdown(true)
+                        }}
+                        className="mt-3 text-yellow-400 hover:text-yellow-300 text-sm underline"
+                      >
+                        Clear search and show all users
+                      </button>
+                    </div>
+                  ) : allUsers.length === 0 ? (
+                    /* Only show "no users in database" when truly empty */
+                    <div className="p-6 text-center text-gray-500">
+                      <Users className="h-16 w-16 mx-auto mb-3 text-gray-600" />
+                      <p className="text-lg font-semibold mb-1">No users found in database</p>
+                      <p className="text-sm">Stats show {totalUsers} users but profiles query failed. Check console for errors.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="sticky top-0 bg-gray-700 px-4 py-2 text-xs text-gray-400 border-b border-gray-600">
+                        Showing {filteredUsers.length} of {allUsers.length} learners
+                      </div>
+                      <div className="py-1">
+                        {filteredUsers.map((u) => (
+                          <button
+                            key={u.id}
+                            onClick={() => handleSelectUser(u.id)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors flex items-center space-x-3 border-b border-gray-700/50 last:border-b-0"
+                          >
+                            {u.avatar_url ? (
+                              <img 
+                                src={u.avatar_url} 
+                                alt="" 
+                                className="w-10 h-10 rounded-full flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                                {(u.display_name?.[0] || u.username?.[0] || '?').toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-medium truncate">
+                                {u.display_name || u.username}
+                              </p>
+                              <p className="text-gray-400 text-sm truncate">
+                                @{u.username}
+                              </p>
+                              {u.email && (
+                                <p className="text-gray-500 text-xs truncate">
+                                  {u.email}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Selected User Info */}

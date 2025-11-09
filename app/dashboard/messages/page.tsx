@@ -135,18 +135,37 @@ export default function MessagesPage() {
     setSending(true)
 
     try {
-      const { error } = await supabase
+      const { data: newMsg, error } = await supabase
         .from('direct_messages')
         .insert({
           sender_id: user.id,
           recipient_id: selectedUser.id,
           message: newMessage.trim(),
         })
+        .select(`
+          *,
+          sender:profiles!sender_id (id, username, display_name, avatar_url),
+          recipient:profiles!recipient_id (id, username, display_name, avatar_url)
+        `)
+        .single()
 
       if (error) throw error
 
+      // Immediately add the message to the local conversation
+      if (newMsg) {
+        setConversations(prev => {
+          const newConv = new Map(prev)
+          const partnerId = selectedUser.id
+          const existingMsgs = newConv.get(partnerId) || []
+          newConv.set(partnerId, [...existingMsgs, newMsg])
+          return newConv
+        })
+      }
+
       setNewMessage('')
-      await fetchAllConversations()
+      
+      // Fetch fresh data in the background
+      setTimeout(() => fetchAllConversations(), 100)
     } catch (error) {
       console.error('Error sending message:', error)
       alert('Failed to send message')
@@ -191,9 +210,25 @@ export default function MessagesPage() {
   const currentMessages = selectedUser ? conversations.get(selectedUser.id) || [] : []
 
   // Get users with messages (for quick access)
+  // Include selected user if they have a conversation
   const usersWithMessages = Array.from(conversations.keys())
-    .map(userId => allUsers.find(u => u.id === userId))
-    .filter(u => u != null)
+    .map(userId => {
+      const userObj = allUsers.find(u => u.id === userId)
+      const msgs = conversations.get(userId) || []
+      const lastMessage = msgs[msgs.length - 1]
+      return {
+        user: userObj,
+        lastMessageTime: lastMessage ? new Date(lastMessage.created_at).getTime() : 0
+      }
+    })
+    .filter(item => item.user != null)
+    .sort((a, b) => b.lastMessageTime - a.lastMessageTime) // Sort by most recent
+    .map(item => item.user!)
+  
+  // Ensure selected user appears in recent conversations if there are messages
+  if (selectedUser && conversations.has(selectedUser.id) && !usersWithMessages.find(u => u.id === selectedUser.id)) {
+    usersWithMessages.unshift(selectedUser)
+  }
 
   if (loading) {
     return (
@@ -364,6 +399,9 @@ export default function MessagesPage() {
                     ) : (
                       currentMessages.map((msg) => {
                         const isMe = msg.sender_id === user?.id
+                        const senderName = isMe 
+                          ? 'You' 
+                          : (msg.sender?.display_name || msg.sender?.username || selectedUser?.display_name || selectedUser?.username || 'Unknown')
                         
                         return (
                           <div
@@ -371,6 +409,11 @@ export default function MessagesPage() {
                             className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                           >
                             <div className={`max-w-[70%] ${isMe ? 'order-2' : 'order-1'}`}>
+                              {/* Sender Name */}
+                              <p className={`text-xs font-semibold mb-1 px-2 ${isMe ? 'text-right text-purple-300' : 'text-left text-gray-400'}`}>
+                                {senderName}
+                              </p>
+                              {/* Message Bubble */}
                               <div
                                 className={`rounded-2xl px-4 py-2 ${
                                   isMe
@@ -380,7 +423,8 @@ export default function MessagesPage() {
                               >
                                 <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
                               </div>
-                              <p className="text-xs text-gray-500 mt-1 px-2">
+                              {/* Timestamp */}
+                              <p className={`text-xs text-gray-500 mt-1 px-2 ${isMe ? 'text-right' : 'text-left'}`}>
                                 {new Date(msg.created_at).toLocaleTimeString([], { 
                                   hour: '2-digit', 
                                   minute: '2-digit' 
