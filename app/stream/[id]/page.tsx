@@ -55,6 +55,85 @@ const EXPERTS = [
   { name: 'Haku', email: 'Haku@nextwork.org', phone: '+17373334912' },
 ]
 
+// Component to show while recording is being processed
+function RecordingProcessing({ streamId }: { streamId: string }) {
+  const router = useRouter()
+  const [secondsElapsed, setSecondsElapsed] = useState(0)
+  const [checkCount, setCheckCount] = useState(0)
+
+  useEffect(() => {
+    // Count seconds
+    const timer = setInterval(() => {
+      setSecondsElapsed(prev => prev + 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    // Check for recording every 5 seconds
+    const checkInterval = setInterval(async () => {
+      setCheckCount(prev => prev + 1)
+      
+      const { data } = await supabase
+        .from('streams')
+        .select('playback_url')
+        .eq('id', streamId)
+        .single()
+
+      if (data && data.playback_url) {
+        console.log('✅ Recording ready! Reloading page...')
+        router.refresh()
+      }
+    }, 5000)
+
+    return () => clearInterval(checkInterval)
+  }, [streamId, router])
+
+  return (
+    <div className="w-full bg-gray-900 rounded-2xl shadow-xl p-12 flex flex-col items-center border border-yellow-800">
+      <div className="text-6xl mb-6 animate-pulse">⏳</div>
+      <h2 className="text-2xl font-bold text-white mb-4 text-center">Processing Recording...</h2>
+      <p className="text-gray-400 text-center max-w-lg mb-6">
+        Your recording is being uploaded and processed. This may take a few minutes for longer videos.
+      </p>
+      
+      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-gray-300 text-sm">Elapsed Time:</span>
+          <span className="text-yellow-400 font-bold text-lg">{secondsElapsed}s</span>
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-gray-300 text-sm">Status Checks:</span>
+          <span className="text-blue-400 font-bold">{checkCount}</span>
+        </div>
+        
+        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden mb-3">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full animate-pulse" style={{ width: '100%' }} />
+        </div>
+        
+        <p className="text-xs text-gray-500 text-center">
+          Auto-checking every 5 seconds...
+        </p>
+      </div>
+
+      <div className="mt-6 p-4 bg-blue-900/20 rounded-lg border border-blue-700/30 max-w-lg">
+        <p className="text-sm text-blue-300">
+          <strong>💡 Tip:</strong> Large recordings (28+ minutes) can take 3-5 minutes to upload. 
+          The page will automatically refresh when ready!
+        </p>
+      </div>
+
+      <button
+        onClick={() => router.push('/dashboard')}
+        className="mt-6 text-gray-400 hover:text-white underline text-sm"
+      >
+        Go to Dashboard
+      </button>
+    </div>
+  )
+}
+
 export default function StreamPage({
   params,
 }: {
@@ -502,6 +581,9 @@ export default function StreamPage({
                 </>
               )}
               </div>
+            ) : stream.ended_at && !hasValidRecording ? (
+              /* Stream ended recently - recording might still be uploading */
+              <RecordingProcessing streamId={stream.id} />
             ) : (
               /* Stream has ended without a recording */
               <div className="w-full bg-gray-900 rounded-2xl shadow-xl p-12 flex flex-col items-center border border-gray-800">
