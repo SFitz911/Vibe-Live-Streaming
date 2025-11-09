@@ -11,9 +11,11 @@ import Link from 'next/link'
 export default function HomePage() {
   const [liveStreams, setLiveStreams] = useState<any[]>([])
   const [recentStreams, setRecentStreams] = useState<any[]>([])
+  const [displayedStreamCount, setDisplayedStreamCount] = useState(6) // Pagination
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'views'>('newest')
   const [filterCategory, setFilterCategory] = useState<string>('All')
   const [categories, setCategories] = useState<string[]>(['All'])
+  const [hasMoreStreams, setHasMoreStreams] = useState(false)
 
   useEffect(() => {
     fetchLiveStreams()
@@ -21,14 +23,29 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchRecentStreams()
+  }, [sortBy, filterCategory, displayedStreamCount])
+  
+  // Reset pagination when filters change
+  useEffect(() => {
+    setDisplayedStreamCount(6)
   }, [sortBy, filterCategory])
 
   const fetchLiveStreams = async () => {
-    // Show streams that are LIVE or recently ended (within 30 minutes)
+    // Show streams that are LIVE or recently ended (within 30 minutes) - Optimized query
     const { data, error } = await supabase
       .from('streams')
       .select(`
-        *,
+        id,
+        title,
+        description,
+        category,
+        thumbnail_url,
+        video_30s_url,
+        video_12s_url,
+        is_live,
+        viewer_count,
+        created_at,
+        user_id,
         profiles (
           username,
           display_name,
@@ -49,7 +66,18 @@ export default function HomePage() {
     let query = supabase
       .from('streams')
       .select(`
-        *,
+        id,
+        title,
+        description,
+        category,
+        thumbnail_url,
+        video_30s_url,
+        video_12s_url,
+        playback_url,
+        is_live,
+        viewer_count,
+        created_at,
+        user_id,
         profiles (
           username,
           display_name,
@@ -73,12 +101,17 @@ export default function HomePage() {
       query = query.order('viewer_count', { ascending: false })
     }
 
-    query = query.limit(12)
+    // Fetch one extra to check if there are more streams
+    query = query.limit(displayedStreamCount + 1)
 
     const { data, error } = await query
 
     if (!error && data) {
-      setRecentStreams(data)
+      // Check if there are more streams
+      setHasMoreStreams(data.length > displayedStreamCount)
+      
+      // Only show the requested amount
+      setRecentStreams(data.slice(0, displayedStreamCount))
       
       // Extract unique categories from all recorded streams
       const allRecorded = await supabase
@@ -257,11 +290,25 @@ export default function HomePage() {
           </div>
           
           {recentStreams.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {recentStreams.map((stream: any) => (
-                <StreamCard key={stream.id} stream={stream} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {recentStreams.map((stream: any) => (
+                  <StreamCard key={stream.id} stream={stream} />
+                ))}
+              </div>
+              
+              {/* Load More Button */}
+              {hasMoreStreams && (
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => setDisplayedStreamCount(prev => prev + 6)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+                  >
+                    Load More Streams
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">

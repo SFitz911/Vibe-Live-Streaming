@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import BackButton from '@/components/BackButton'
@@ -8,6 +8,23 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { Users, Award, ThumbsUp, Video, TrendingUp, CheckCircle, Search, X, Settings, Shield } from 'lucide-react'
 import Link from 'next/link'
+
+// Debounce hook for search inputs
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
 
 export default function AdminPage() {
   const router = useRouter()
@@ -27,6 +44,7 @@ export default function AdminPage() {
   // User search and project marking
   const [searchEmail, setSearchEmail] = useState('')
   const [allUsers, setAllUsers] = useState<any[]>([])
+  const [displayedUserCount, setDisplayedUserCount] = useState(10) // Pagination
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [selectedProject, setSelectedProject] = useState('')
@@ -68,11 +86,11 @@ export default function AdminPage() {
   }
 
   const fetchAllData = async () => {
-    // Fetch all users for autocomplete
+    // Fetch all users for autocomplete (optimized - only needed columns)
     console.log('🔍 Fetching users from profiles table...')
     const { data: usersData, error: usersError } = await supabase
       .from('profiles')
-      .select('*')  // Fetch all columns to avoid missing column errors
+      .select('id, username, display_name, avatar_url')  // Removed email - column doesn't exist
       .order('username', { ascending: true, nullsFirst: false })
     
     if (usersError) {
@@ -183,17 +201,23 @@ export default function AdminPage() {
     }
   }
 
-  // Filter users based on search input
+  // Debounce search input to reduce filtering on every keystroke
+  const debouncedSearchEmail = useDebounce(searchEmail, 300)
+  
+  // Filter users based on debounced search input
   const filteredUsers = allUsers.filter(u => {
-    const searchTerm = searchEmail.toLowerCase().trim()
+    const searchTerm = debouncedSearchEmail.toLowerCase().trim()
     if (!searchTerm) return true // Show all if empty
     
     return (
       u.username?.toLowerCase().includes(searchTerm) ||
-      u.display_name?.toLowerCase().includes(searchTerm) ||
-      u.email?.toLowerCase().includes(searchTerm)
+      u.display_name?.toLowerCase().includes(searchTerm)
     )
-  }) // Show all filtered results
+  })
+  
+  // Paginate filtered results
+  const paginatedUsers = filteredUsers.slice(0, displayedUserCount)
+  const hasMoreUsers = filteredUsers.length > displayedUserCount
 
   const handleSelectUser = async (userId: string) => {
     // Fetch full user data with related records
@@ -394,7 +418,7 @@ export default function AdminPage() {
                     setShowDropdown(true)
                   }}
                   onFocus={() => setShowDropdown(true)}
-                  placeholder={`Search ${allUsers.length} learners by username, name, or email...`}
+                  placeholder={`Search ${allUsers.length} learners by username or name...`}
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
@@ -445,10 +469,11 @@ export default function AdminPage() {
                   ) : (
                     <>
                       <div className="sticky top-0 bg-gray-700 px-4 py-2 text-xs text-gray-400 border-b border-gray-600">
-                        Showing {filteredUsers.length} of {allUsers.length} learners
+                        Showing {paginatedUsers.length} of {filteredUsers.length} learners
+                        {filteredUsers.length !== allUsers.length && ` (filtered from ${allUsers.length} total)`}
                       </div>
                       <div className="py-1">
-                        {filteredUsers.map((u) => (
+                        {paginatedUsers.map((u) => (
                           <button
                             key={u.id}
                             onClick={() => handleSelectUser(u.id)}
@@ -472,15 +497,22 @@ export default function AdminPage() {
                               <p className="text-gray-400 text-sm truncate">
                                 @{u.username}
                               </p>
-                              {u.email && (
-                                <p className="text-gray-500 text-xs truncate">
-                                  {u.email}
-                                </p>
-                              )}
                             </div>
                           </button>
                         ))}
                       </div>
+                      
+                      {/* Load More Button */}
+                      {hasMoreUsers && (
+                        <div className="sticky bottom-0 bg-gray-700 px-4 py-3 border-t border-gray-600">
+                          <button
+                            onClick={() => setDisplayedUserCount(prev => prev + 10)}
+                            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold text-sm transition-colors"
+                          >
+                            Load More ({filteredUsers.length - displayedUserCount} remaining)
+                          </button>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
