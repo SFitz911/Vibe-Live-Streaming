@@ -216,12 +216,13 @@ export default function StreamCard({ stream }: StreamCardProps) {
       )
     }
 
-    // No thumbnail available
+    // No thumbnail available - show nice placeholder
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black">
         <div className="text-center">
-          <Play className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No thumbnail</p>
+          <Play className="w-20 h-20 text-gray-600 mx-auto mb-2" />
+          <p className="text-gray-500 text-sm font-medium">Recording Available</p>
+          <p className="text-gray-600 text-xs mt-1">Click to Watch</p>
         </div>
       </div>
     )
