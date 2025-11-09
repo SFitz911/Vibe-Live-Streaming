@@ -150,7 +150,7 @@ export default function AdminSettingsPage() {
 
             {/* Resource Monitor */}
             <ResourceMonitor
-              autoRefresh={true}
+              autoRefresh={false}
               refreshInterval={5000}
               currentMode={currentMode}
             />

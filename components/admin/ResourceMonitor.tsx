@@ -155,6 +155,7 @@ export default function ResourceMonitor({
         <p className="text-xs text-gray-500 mb-4">
           Last updated: {lastUpdated.toLocaleTimeString()}
           {autoRefresh && ' (auto-refreshing every 5s)'}
+          {!autoRefresh && ' (click refresh to update)'}
         </p>
       )}
 
