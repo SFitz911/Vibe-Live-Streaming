@@ -141,3 +141,19 @@ body {
 .animate-slideInDown {
   animation: slideInDown 0.4s ease-out;
 }
+
+/* Toast notification slide-in from right */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.4s ease-out;
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, X, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
@@ -10,10 +10,16 @@ interface ExpertNotificationProps {
   streamTitle?: string
 }
 
+interface Toast {
+  type: 'success' | 'error' | 'warning'
+  message: string
+}
+
 export default function TestExpertNotificationButton({ streamId, streamTitle }: ExpertNotificationProps = {}) {
   const { user, profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium')
+  const [toast, setToast] = useState<Toast | null>(null)
 
   // Play the alert sound for both sender and receiver
   const playAlertSound = (urgency: 'low' | 'medium' | 'high') => {
@@ -75,7 +81,11 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
 
   const triggerTestExpertNotification = async () => {
     if (!user) {
-      alert('Please log in to send messages')
+      setToast({
+        type: 'warning',
+        message: 'Please log in to send messages'
+      })
+      setTimeout(() => setToast(null), 5000)
       return
     }
 
@@ -92,7 +102,11 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
         .ilike('email', '%@nextwork.org')
 
       if (!staffUsers || staffUsers.length === 0) {
-        alert('No admin staff available at the moment')
+        setToast({
+          type: 'warning',
+          message: 'No admin staff available at the moment'
+        })
+        setTimeout(() => setToast(null), 5000)
         setLoading(false)
         return
       }
@@ -130,59 +144,99 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
       })
       window.dispatchEvent(event)
 
-      alert('✅ Staff members have been notified!')
+      setToast({
+        type: 'success',
+        message: '✅ Staff members have been notified!'
+      })
+      setTimeout(() => setToast(null), 5000)
     } catch (error) {
       console.error('Error notifying staff:', error)
-      alert('Failed to notify staff. Please try again.')
+      setToast({
+        type: 'error',
+        message: 'Failed to notify staff. Please try again.'
+      })
+      setTimeout(() => setToast(null), 5000)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700">
-      <p className="text-white text-sm font-bold mb-2">I have a Question</p>
-      <div className="flex space-x-1 mb-2">
+    <>
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-20 right-6 z-50 animate-slideInRight">
+          <div className={`rounded-lg shadow-2xl p-4 max-w-sm border-2 ${
+            toast.type === 'success' 
+              ? 'bg-gradient-to-r from-green-600 to-emerald-600 border-green-400/50' 
+              : toast.type === 'error'
+              ? 'bg-gradient-to-r from-red-600 to-rose-600 border-red-400/50'
+              : 'bg-gradient-to-r from-yellow-600 to-orange-600 border-yellow-400/50'
+          }`}>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                {toast.type === 'success' && <CheckCircle className="h-6 w-6 text-white" />}
+                {toast.type === 'error' && <X className="h-6 w-6 text-white" />}
+                {toast.type === 'warning' && <AlertTriangle className="h-6 w-6 text-white" />}
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-sm">{toast.message}</p>
+              </div>
+              <button
+                onClick={() => setToast(null)}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-gray-800 rounded-lg p-3 mb-3 border border-gray-700">
+        <p className="text-white text-sm font-bold mb-2">I have a Question</p>
+        <div className="flex space-x-1 mb-2">
+          <button
+            onClick={() => setUrgency('low')}
+            className={`px-2 py-1 rounded text-xs font-semibold ${
+              urgency === 'low' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-700 text-gray-400'
+            }`}
+          >
+            Low (2x)
+          </button>
+          <button
+            onClick={() => setUrgency('medium')}
+            className={`px-2 py-1 rounded text-xs font-semibold ${
+              urgency === 'medium' 
+                ? 'bg-yellow-600 text-white' 
+                : 'bg-gray-700 text-gray-400'
+            }`}
+          >
+            Medium (4x)
+          </button>
+          <button
+            onClick={() => setUrgency('high')}
+            className={`px-2 py-1 rounded text-xs font-semibold ${
+              urgency === 'high' 
+                ? 'bg-red-600 text-white' 
+                : 'bg-gray-700 text-gray-400'
+            }`}
+          >
+            High (6x)
+          </button>
+        </div>
         <button
-          onClick={() => setUrgency('low')}
-          className={`px-2 py-1 rounded text-xs font-semibold ${
-            urgency === 'low' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-700 text-gray-400'
-          }`}
+          onClick={triggerTestExpertNotification}
+          disabled={loading}
+          className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-bold transition-all flex items-center justify-center space-x-2 disabled:opacity-50 text-sm"
         >
-          Low (2x)
-        </button>
-        <button
-          onClick={() => setUrgency('medium')}
-          className={`px-2 py-1 rounded text-xs font-semibold ${
-            urgency === 'medium' 
-              ? 'bg-yellow-600 text-white' 
-              : 'bg-gray-700 text-gray-400'
-          }`}
-        >
-          Medium (4x)
-        </button>
-        <button
-          onClick={() => setUrgency('high')}
-          className={`px-2 py-1 rounded text-xs font-semibold ${
-            urgency === 'high' 
-              ? 'bg-red-600 text-white' 
-              : 'bg-gray-700 text-gray-400'
-          }`}
-        >
-          High (6x)
+          <AlertCircle className="h-4 w-4" />
+          <span>Alert Staff of Question</span>
         </button>
       </div>
-      <button
-        onClick={triggerTestExpertNotification}
-        disabled={loading}
-        className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-bold transition-all flex items-center justify-center space-x-2 disabled:opacity-50 text-sm"
-      >
-        <AlertCircle className="h-4 w-4" />
-        <span>Alert Staff of Question</span>
-      </button>
-    </div>
+    </>
   )
 }
 
