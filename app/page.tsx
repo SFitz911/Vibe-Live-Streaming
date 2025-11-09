@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import StreamCard from '@/components/StreamCard'
 import Navigation from '@/components/Navigation'
 import TestNotificationButton from '@/components/TestNotificationButton'
-import { Flame, TrendingUp, Users, Play, Star, Zap, Eye, Settings, Compass, BookOpen, HelpCircle, FileText, Filter } from 'lucide-react'
+import { Flame, TrendingUp, Users, Play, Star, Zap, Eye, Settings, Compass, BookOpen, HelpCircle, FileText, Filter, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HomePage() {
@@ -113,9 +113,9 @@ export default function HomePage() {
               Live coding sessions for IT learners and future professionals exploring advanced AI, cloud technologies, and building innovative solutions together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/discover" className="bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
-                <Users className="mr-2" size={20} />
-                Discover Streams
+              <Link href="/dashboard/messages" className="bg-purple-500/20 hover:bg-purple-500/30 border-2 border-purple-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
+                <MessageSquare className="mr-2" size={20} />
+                Messages
               </Link>
               <Link href="/stream/demo-live" className="bg-red-500/20 hover:bg-red-500/30 border-2 border-red-500 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center text-lg">
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse mr-2"></span>
@@ -359,8 +359,8 @@ export default function HomePage() {
               <h3 className="font-semibold text-white mb-4">Community</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/discover" className="text-sm text-gray-400 hover:text-primary transition-colors">
-                    Discover Streams
+                  <Link href="/dashboard/messages" className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    Messages
                   </Link>
                 </li>
                 <li>
