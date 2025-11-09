@@ -165,7 +165,7 @@ export default function TestExpertNotificationButton({ streamId, streamTitle }: 
     <>
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-24 right-6 z-50 animate-slideInRight">
+        <div className="fixed top-32 right-6 z-50 animate-slideInRight">
           <div className={`rounded-lg shadow-2xl p-4 max-w-sm border-2 ${
             toast.type === 'success' 
               ? 'bg-gradient-to-r from-green-600 to-emerald-600 border-green-400/50' 
