@@ -130,8 +130,13 @@ export default function LiveKitGoLive({
     };
 
     const handleLeave = async () => {
+        console.log('🔴 End Stream clicked!');
+        console.log('MediaRecorder state:', mediaRecorder?.state);
+        console.log('StreamID:', streamId);
+        
         // Stop recording if active and wait for it to finish
         if (mediaRecorder && mediaRecorder.state !== 'inactive' && streamId) {
+            console.log('⏹️ Stopping MediaRecorder...');
             mediaRecorder.stop();
             
             // Wait a moment for the onstop handler to collect final chunks
@@ -139,6 +144,7 @@ export default function LiveKitGoLive({
             
             // Get chunks from ref (synchronous access)
             const allChunks = recordedChunksRef.current;
+            console.log(`📊 Chunks collected: ${allChunks.length} chunks`);
             
             if (allChunks.length > 0) {
                 // Upload in background (don't await) so UI can close immediately
@@ -152,15 +158,20 @@ export default function LiveKitGoLive({
                         formData.append('file', blob);
                         formData.append('streamId', streamId);
 
+                        console.log('🚀 Starting upload to /api/streams/upload-recording...');
                         const response = await fetch('/api/streams/upload-recording', {
                             method: 'POST',
                             body: formData,
                         });
 
+                        console.log('📡 Upload response status:', response.status);
+                        
                         if (response.ok) {
-                            console.log('✅ Recording uploaded successfully!');
+                            const result = await response.json();
+                            console.log('✅ Recording uploaded successfully!', result);
                         } else {
-                            console.error('❌ Failed to upload recording');
+                            const errorText = await response.text();
+                            console.error('❌ Failed to upload recording. Status:', response.status, 'Error:', errorText);
                         }
                     } catch (error) {
                         console.error('❌ Error uploading recording:', error);
@@ -168,9 +179,10 @@ export default function LiveKitGoLive({
                 };
                 
                 // Start upload but don't wait for it
+                console.log('🎬 Triggering upload function...');
                 uploadRecording();
             } else {
-                console.log('No chunks to upload');
+                console.warn('⚠️ No chunks to upload - recording may have failed!');
             }
         }
 
