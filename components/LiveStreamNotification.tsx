@@ -97,30 +97,54 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
 
   const playNotificationSound = () => {
     try {
-      // Create a pleasant bell sound using Web Audio API
+      // Create a pleasant upward chime notification sound
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      
-      // Create oscillators for a pleasant bell sound (E5 chord)
-      const frequencies = [659.25, 783.99, 987.77] // E5, G5, B5
       const now = audioContext.currentTime
+      
+      // Pleasant ascending melody (C major triad with added 7th - like iOS notification)
+      const melody = [
+        { freq: 523.25, time: 0.05, duration: 0.15 },  // C5 - slight delay for clean start
+        { freq: 659.25, time: 0.17, duration: 0.15 },  // E5
+        { freq: 783.99, time: 0.29, duration: 0.20 },  // G5
+        { freq: 987.77, time: 0.43, duration: 0.30 },  // B5 (longer, final note)
+      ]
 
-      frequencies.forEach((freq, index) => {
+      melody.forEach(note => {
+        // Main oscillator (pure tone)
         const oscillator = audioContext.createOscillator()
         const gainNode = audioContext.createGain()
 
         oscillator.connect(gainNode)
         gainNode.connect(audioContext.destination)
 
-        oscillator.frequency.value = freq
+        oscillator.frequency.value = note.freq
         oscillator.type = 'sine'
 
-        // Envelope for bell-like sound
-        gainNode.gain.setValueAtTime(0, now)
-        gainNode.gain.linearRampToValueAtTime(0.1 - (index * 0.02), now + 0.01)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5)
+        // Volume envelope - quick attack, gentle decay (louder!)
+        const startTime = now + note.time
+        gainNode.gain.setValueAtTime(0, startTime)
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01) // Louder: 0.3 (was 0.1)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + note.duration)
 
-        oscillator.start(now + (index * 0.05))
-        oscillator.stop(now + 1.5)
+        oscillator.start(startTime)
+        oscillator.stop(startTime + note.duration)
+
+        // Add harmonic for richness (subtle overtone)
+        const harmonic = audioContext.createOscillator()
+        const harmonicGain = audioContext.createGain()
+
+        harmonic.connect(harmonicGain)
+        harmonicGain.connect(audioContext.destination)
+
+        harmonic.frequency.value = note.freq * 2 // One octave higher
+        harmonic.type = 'sine'
+
+        harmonicGain.gain.setValueAtTime(0, startTime)
+        harmonicGain.gain.linearRampToValueAtTime(0.1, startTime + 0.01) // Subtle harmonic
+        harmonicGain.gain.exponentialRampToValueAtTime(0.01, startTime + note.duration)
+
+        harmonic.start(startTime)
+        harmonic.stop(startTime + note.duration)
       })
     } catch (error) {
       console.log('Audio playback failed:', error)
@@ -141,11 +165,11 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
 
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-slideInUp">
-      <div className="bg-gradient-to-r from-primary-600 to-purple-600 rounded-lg shadow-2xl p-4 max-w-sm border-2 border-primary-400/50">
+      <div className="bg-green-500/20 backdrop-blur-sm rounded-lg shadow-2xl p-4 max-w-sm border-2 border-green-500">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center animate-pulse">
-              <Bell className="h-6 w-6 text-primary-600" />
+              <Bell className="h-6 w-6 text-green-600" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -158,7 +182,7 @@ export default function LiveStreamNotification({ isEnabled = true }: LiveStreamN
                 <p className="text-white font-semibold mb-2">{notification.streamTitle}</p>
                 <button
                   onClick={handleViewStream}
-                  className="bg-green-400 text-gray-900 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-500 transition-colors shadow-md"
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold transition-colors shadow-md"
                 >
                   Watch Now
                 </button>
